@@ -16,6 +16,7 @@ public class HumanPlayer {
 	private ArrayList<TownNode> towns = new ArrayList<TownNode>();
 	private ArrayList<RoadNode> roads = new ArrayList<RoadNode>();
 	private ArrayList<Integer> hand = new ArrayList<Integer>();
+   private ArrayList<Card> development = new ArrayList<Card>();
 	private Menu menu;
 	
 	private void resourceProduction() {
@@ -23,6 +24,9 @@ public class HumanPlayer {
 		for (TownNode town : towns) {
 			for (Tile tile : town.getAdjacentTiles()) {
 				if (tile.roll == roll) {
+				  if (town.getBuildLevel() == 2) {
+				    hand.add(tile.resource);
+				  }
 					hand.add(tile.resource);
 				}
 			}

@@ -33,7 +33,7 @@ public class TownNode extends Node {
 	
 	// returns true if there is an adjacent road owned by the same player
 	public boolean isBuildable(HumanPlayer prospector) {
-		if (level == 3) {
+		if (level >= 3) {
 			return false;
 		}
 		for (TownNode t : adj_towns) {
