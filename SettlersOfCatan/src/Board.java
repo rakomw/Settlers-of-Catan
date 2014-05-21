@@ -44,44 +44,76 @@ public class Board {
 			tile2 = temp;
 		}
 		
-		// initialize the road nodes
-		RoadNode[][][] constructors = new RoadNode[roads.length][][];
+		// create & instantiate the temp construction arrays for the nodes
+		Node[][][] road_constructors = new Node[roads.length][][]; // for road constructor
 		for (r = 0; r < roads.length; r++) {
-			constructors[r] = new RoadNode[roads[r].length][]; // instantiate the varying length of the columns
+			road_constructors[r] = new RoadNode[roads[r].length][]; // instantiate the varying length of the columns
+		}
+		RoadNode[][][] town_road_constructors = new RoadNode[roads.length][][]; // for town constructor, road parameter
+		for (r = 0; r < town_road_constructors.length; r++) {
+			town_road_constructors[r] = new RoadNode[roads[r].length][];
+		}
+		TownNode[][][] town_town_constructors = new TownNode[towns.length][][]; // for town constructor, town parameter
+		for (r = 0; r < town_road_constructors.length; r++) {
+			town_road_constructors[r] = new RoadNode[towns[r].length][];
 		}
 		
-		for (r = 0; r < roads.length; r++) {
-			for (c = 0; c < roads[r].length; r++) {
-				roads[r][c] = new RoadNode(constructors[r][c]);
-			}
-		}
-		
+		// instantiate the 3rd level arrays to their correct lengths
 		int length;
-		for (r = 0; r < roads.length; r ++) {
+		for (r = 0; r < roads.length; r++) { // loop for the road constructors
 			for (c = 0; c < roads[r].length; c++) {
 				// find the correct size of the array
 				length = 4;
-				if (c == 0 || c == roads[r].length - 1) {
-					length--;
-				}
 				if (r == 0 || r == roads.length - 1) {
 					length--;
 				}
-				constructors[r][c] = new RoadNode[length];
+				if (c == 0 || c == roads[r].length - 1) {
+					length--;
+				}
+				road_constructors[r][c] = new RoadNode[length];
 			}
 		}
-		
+		for (r = 0; r < towns.length; r++) { // loop for the town constructors, road parameter
+			for (c = 0; c < towns[r].length; c++) {
+				length = 3;
+				if (r == 0 || r == towns.length - 1) {
+					length--;
+				}
+				else if (c == 0 || c == towns[r].length - 1) { // else because all towns have atleast 2 adj roads
+					length--;
+				}
+				town_road_constructors[r][c] = new RoadNode[length];
+			}
+		}
+		for (r = 0; r < towns.length; r++) {
+			for (c = 0; c < towns[r].length; c++) {
+				length = 3;
+				if (r == 0 || r == towns.length - 1) {
+					length--;
+				}
+				else if (c == 0 || c == towns[r].length - 1) {
+					length--;
+				}
+				town_town_constructors[r][c] = new TownNode[length];
+			}
+		}
+
+		for (r = 0; r < roads.length; r++) {
+			for (c = 0; c < roads[r].length; r++) {
+				roads[r][c] = new RoadNode(road_constructors[r][c]);
+			}
+		}
 		// construct vertical roads
 		for (r = 1; r < roads.length; r += 2) {
 			for (c = 1; c < roads[r].length; c++) {
-				constructVerticals(r, c, constructors);
+				constructVerticalRoads(r, c, road_constructors);
 			}
 		}
 		
 		// construct horizontal roads
 		for (r = 0; r < roads.length; r += 2) {
 			for (c = 0; c < roads[r].length; c++) {
-				constructHorizontals(r, c, constructors);
+				constructHorizontalRoads(r, c, road_constructors);
 			}
 		}
 		// initialize the town nodes
@@ -91,7 +123,7 @@ public class Board {
 	// these methods are used to ease construction of roads
 	
 	// constructs vertical references and references of adjacent horizontals to the vertical road
-	void constructVerticals(int r, int c, RoadNode[][][] constructors) {
+	void constructVerticalRoads(int r, int c, Node[][][] constructors) {
 		int index = 0, // used to add to the road's array
 			other_r, other_c; // used to store the other's location
 		if (r < 5) {
@@ -167,8 +199,8 @@ public class Board {
 		}
 	}
 	// completes the references of horizontal roads
-	private void constructHorizontals(int r, int c, RoadNode[][][] constructors) {
-		RoadNode[] references = constructors[r][c];
+	private void constructHorizontalRoads(int r, int c, Node[][][] constructors) {
+		Node[] references = constructors[r][c];
 		int x;
 		if (onBoard(r, c - 1)) {
 			for (x = 0; x < references.length; x++) {
@@ -190,8 +222,8 @@ public class Board {
 		return r >= 0 || r < roads.length || c >= 0 || c < roads[r].length;
 	}
 	private void linkReference(int r, int c, int other_r, int other_c, final int cur_adj,
-							   RoadNode[][][] constructors) {
-		RoadNode[] others_constructors;
+							   Node[][][] constructors) {
+		Node[] others_constructors;
 		
 		constructors[r][c][cur_adj] = roads[other_r][other_c];
 		others_constructors = constructors[other_r][other_c];
@@ -216,8 +248,8 @@ public class Board {
 								  new RoadNode[6]};
 	private TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
 
-	public int getResourceAt(int row, int col) {
-		return tiles[row][col].resource;
+	public Tile getTileAt(int row, int col) {
+		return tiles[row][col];
 	}
 	
 	public void moveRobber() {
