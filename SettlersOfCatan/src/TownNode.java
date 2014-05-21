@@ -1,10 +1,12 @@
 import java.lang.Exception;
 
 public class TownNode extends Node {
-	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns) {
+	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns,boolean trader,int trader_stats) {
 		adj_tiles = in_tiles;
 		adj_roads = in_roads;
 		adj_towns = in_towns;
+		is_trader = trader;
+		trade_stats = trader_stats;
 	}
 	
 	public static final int NOTHING = 0;
@@ -14,6 +16,8 @@ public class TownNode extends Node {
 	private final Tile[] adj_tiles;
 	private final RoadNode[] adj_roads;
 	private final TownNode[] adj_towns;
+	private boolean is_trader;
+	private int trade_stats;
 	
 	public void buildUp(HumanPlayer in_owner) throws Exception {
 		if (level < 3) {
@@ -63,5 +67,11 @@ public class TownNode extends Node {
 	public Tile getAdjacentTile(int index) {
 		// prevent returning by reference
 		return new Tile(adj_tiles[index].resource, adj_tiles[index].roll);
+	}
+	public boolean get_trader() {
+	  return is_trader;
+	}
+   public int get_trade_stats() {
+	  return trade_stats;//0-4 commodities 2/1 and 5 is general 3/1
 	}
 }
