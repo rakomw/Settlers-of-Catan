@@ -35,7 +35,7 @@ public class GameController {
 	}
 	
 	private static void gameplay() {
-
+		//take turns, check for longest road and most knights
 	}
 
 	private static void endGame() {
