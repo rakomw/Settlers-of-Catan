@@ -9,15 +9,15 @@ public class HumanPlayer {
 	
 	public void takeTurn() {
 		resourceProduction();
-		tradeAndBuild();
+		//tradeAndBuild();
 	}
 	
 	public final Color color;
 	private ArrayList<TownNode> towns = new ArrayList<TownNode>();
 	private ArrayList<RoadNode> roads = new ArrayList<RoadNode>();
 	private ArrayList<Integer> hand = new ArrayList<Integer>();
-        private ArrayList<Card> development = new ArrayList<Card>();
-        private int knights;
+   private ArrayList<Card> development = new ArrayList<Card>();
+   private int knights;
 	private Menu menu;
 	private boolean longest_road;
 	private boolean largest_army;
@@ -27,7 +27,7 @@ public class HumanPlayer {
 		int roll = (int)(Math.random() * 6) + (int)(Math.random() * 6) + 2;
 		for (TownNode town : towns) {
 			for (Tile tile : town.getAdjacentTiles()) {
-				if (tile.roll == roll) {
+				if (tile.roll == roll && tile.has_robber = false) {
 				  if (town.getBuildLevel() == 2) {
 				    hand.add(tile.resource);
 				  }
@@ -76,9 +76,9 @@ public class HumanPlayer {
 		}
 		return points;
 	}
-	private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
+	//private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
      //call menus as players want and get function calls for below
-	}
+	//}
 	private void build_road(RoadNode rode) {
 	    try {
 	    rode.buildUp(this);
