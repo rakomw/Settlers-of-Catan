@@ -16,7 +16,8 @@ public class HumanPlayer {
 	private ArrayList<TownNode> towns = new ArrayList<TownNode>();
 	private ArrayList<RoadNode> roads = new ArrayList<RoadNode>();
 	private ArrayList<Integer> hand = new ArrayList<Integer>();
-   private ArrayList<Card> development = new ArrayList<Card>();
+        private ArrayList<Card> development = new ArrayList<Card>();
+        private int knights;
 	private Menu menu;
 	private static Deck deck = new Deck();
 	
@@ -34,6 +35,12 @@ public class HumanPlayer {
 		}
 	}
 	
+	public int get_roads() {
+	  return roads.size();
+	}
+	public int get_knights() {
+		return knights;
+	}
 	private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
      //call menus as players want and get function calls for below
 	}
