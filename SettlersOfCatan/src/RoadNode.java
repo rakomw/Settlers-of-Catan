@@ -1,15 +1,17 @@
 import java.lang.Exception;
 
 public class RoadNode extends Node {
-	public RoadNode(Node[] in_nodes) {
-		adj_nodes = in_nodes;
+	public RoadNode(RoadNode[] in_roads, TownNode[] in_towns) {
+		adj_roads = in_roads;
+		adj_towns = in_towns;
 	}
 	
 	public static final int NOTHING = 0;
 	public static final int ROAD = 1;
 	
 	private int level = 0; // false for no road, true for road
-	private final Node[] adj_nodes; // adjacent towns and roads
+	private final RoadNode[] adj_roads; // adjacent towns and roads
+	private final TownNode[] adj_towns;
 	
 	public void buildUp(HumanPlayer in_owner) throws Exception {
 		if (level == 1) {
@@ -24,12 +26,21 @@ public class RoadNode extends Node {
 		if (level > 0) {
 			return false;
 		}
-		for (Node n : adj_nodes) {
-			if (n.getBuildLevel() > 0 && n.getOwner() == prospector) {
+		for (RoadNode r : adj_roads) {
+			if (r.getBuildLevel() > 0 && r.getOwner() == prospector) {
+				return true;
+			}
+		}
+		for (TownNode t : adj_towns) {
+			if (t.getBuildLevel() > 0 && t.getOwner() == prospector) {
 				return true;
 			}
 		}
 		
 		return false;
+	}
+	
+	public RoadNode[] getAdjacentRoads() {
+		return adj_roads;
 	}
 }
