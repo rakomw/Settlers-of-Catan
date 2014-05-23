@@ -48,7 +48,6 @@ public class GameController {
 		setUpMainGUI();
 	}
 	
-<<<<<<< HEAD
 	private static void setUpMainGUI(){
 		menu_bar = new JMenuBar();
 		
@@ -97,10 +96,6 @@ public class GameController {
 		menu_bar.add(card_menu);
 		
 		frame.setJMenuBar(menu_bar);
-=======
-	private static void gameplay() {
-		//check for longest road and most knights, check everyones points
->>>>>>> FETCH_HEAD
 	}
 	
 	
