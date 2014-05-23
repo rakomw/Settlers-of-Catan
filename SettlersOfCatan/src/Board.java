@@ -1,6 +1,16 @@
 public class Board {
-	public Board() {
-		// create the random map
+	private static Board instance;
+	public Board getInstance() { // board should only be instantiated once
+		if (instance == null) {
+			return new Board();
+		}
+		else {
+			return null;
+		}
+	}
+	
+	private Board() {
+		// put tiles onto the map
 		int tile_count = 0, r = 0, c = 0;
 		for (; r < tiles.length; r++) {
 			for (; c < tiles[r].length; c++) {
@@ -29,7 +39,8 @@ public class Board {
 			}
 		}
 		
-		for (int x = 0; x < 10000; x++) { // switch random tiles to randomize the map
+		// switch random tiles to randomize the map
+		for (int x = 0; x < 10000; x++) {
 			int[] rows = {(int)(Math.random() * 5.0), 
 					   (int)(Math.random() * 5.0)};
 			
@@ -38,13 +49,13 @@ public class Board {
 			
 			Tile tile1 = tiles[rows[0]][cols[0]], 
 				 tile2 = tiles[rows[1]][cols[1]], 
-				 temp = new Tile(tile1.resource, tile1.roll);
+				 temp = tile1;
 			
 			tile1 = tile2;
 			tile2 = temp;
 		}
 		
-		// create & instantiate the temp construction arrays for the nodes
+		// create & instantiate the temporary construction arrays for the nodes
 		Node[][][] road_constructors = new Node[roads.length][][]; // for road constructor
 		for (r = 0; r < roads.length; r++) {
 			road_constructors[r] = new RoadNode[roads[r].length][]; // instantiate the varying length of the columns
@@ -120,86 +131,75 @@ public class Board {
 		
 	}
 	
-	// these methods are used to ease construction of roads
+	// these are road construction helper methods
 	
 	// constructs vertical references and references of adjacent horizontals to the vertical road
-	void constructVerticalRoads(int r, int c, Node[][][] constructors) {
+	void constructVerticalRoads(final int r, final int c, final Node[][][] constructors) {
 		int index = 0, // used to add to the road's array
 			other_r, other_c; // used to store the other's location
-		if (r < 5) {
-			other_r = r - 1;
-			other_c = c * 2;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
-			}
-			other_c++; // other_c = c * 2 + 1;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
-			}
-			other_r = r + 1; // other_c = c * 2 + 1;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
-			}
-			other_c++; // other_c = c * 2 + 2
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				//index++; don't need this, function ends
-			}
-		}
-		else if (r == 5) {
+		if (r == 5) {
 			other_r = r - 1;
 			other_c = c * 2 - 1;
 			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
+				linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 			other_c++;
 			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
+				linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 			other_r = r + 1;
 			other_c = c * 2 - 1;
 			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
+				linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 			other_c++;
 			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				//index++; not needed, function ends
+				linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 		}
-		else {
-			other_r = r - 1;
-			other_c = c * 2 + 1;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
+		else { // the road is in the poles
+			int[] other_cs = {c * 2, c * 2 + 1, c * 2 + 1, c * 2 + 2, };
+			
+			if (r < 5) { // above the equator
+				for (int x = 0; x < other_cs.length; x++) {
+					if (x < 2) { // changes the row of the other road
+						other_r = r - 1;
+						other_c = other_cs[x];
+						if (onBoard(other_r, other_c)) {
+							linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+						}
+					}
+					else {
+						other_r = r + 1;
+						other_c = other_cs[x];
+						if (onBoard(other_r, other_c)) {
+							linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+						}
+					}
+				}
 			}
-			other_c++; // other_c = c * 2 + 2;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
-			}
-			other_r = r + 1;
-			other_c = c * 2;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				index++;
-			}
-			other_c++; // other_c = c * 2 + 1;
-			if (onBoard(other_r, other_c)) {
-				linkReference(r, c, other_r, other_c, index, constructors);
-				//index++; not needed, function ends
+			else { // below the equator
+				for (int x = 0; x < other_cs.length; x++) {
+					if (x < 2) { // changes the row of the other road
+						other_r = r + 1;
+						other_c = other_cs[x];
+						if (onBoard(other_r, other_c)) {
+							linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+						}
+					}
+					else {
+						other_r = r - 1;
+						other_c = other_cs[x];
+						if (onBoard(other_r, other_c)) {
+							linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+						}
+					}
+				}
 			}
 		}
 	}
 	// completes the references of horizontal roads
-	private void constructHorizontalRoads(int r, int c, Node[][][] constructors) {
+	private void constructHorizontalRoads(final int r, final int c, final Node[][][] constructors) {
 		Node[] references = constructors[r][c];
 		int x;
 		if (onBoard(r, c - 1)) {
@@ -218,35 +218,47 @@ public class Board {
 		}
 	}
 	
-	private boolean onBoard(int r, int c) {
+	private boolean onBoard(final int r, final int c) {
 		return r >= 0 || r < roads.length || c >= 0 || c < roads[r].length;
 	}
-	private void linkReference(int r, int c, int other_r, int other_c, final int cur_adj,
-							   Node[][][] constructors) {
-		Node[] others_constructors;
+	
+	/*
+	 * functions for setting up references between two nodes
+	 * constructors & others_costructors: the construction arrays to be modified, 
+	 * first & other: the objects to be linked
+	 * precondition: parameters match up (e.g. others_constructors -> other)
+	 */
+	private void linkReference(final Node[] constructors, final Node[] others_constructors, final Node first, final Node other) {
+		int x;
+		// add to first's references
+		for (x = 0; x < constructors.length; x++) {
+			if (constructors[x] == null) {
+				constructors[x] = other;
+				break;
+			}
+		}
 		
-		constructors[r][c][cur_adj] = roads[other_r][other_c];
-		others_constructors = constructors[other_r][other_c];
-		for (int x = 0; x < others_constructors.length; x++) {
+		// add to other's references
+		for (x = 0; x < others_constructors.length; x++) {
 			if (others_constructors[x] == null) {
-				others_constructors[x] = roads[r][c];
+				others_constructors[x] = first;
 				break;
 			}
 		}
 	}
 	
 	// all array indexes represent row-major item locations on the map
-	private Tile[][] tiles = {new Tile[3], new Tile[4], new Tile[5], new Tile[4], new Tile[3]};
-	int[] robber_loc = new int[2];
+	private static Tile[][] tiles = {new Tile[3], new Tile[4], new Tile[5], new Tile[4], new Tile[3]};
+	private static int[] robber_loc = new int[2];
 	private static final int total_tiles = 19;
 	//even rows are diagonal, odd are vertical
-	private RoadNode[][] roads = {new RoadNode[6], new RoadNode[4], 
+	private static RoadNode[][] roads = {new RoadNode[6], new RoadNode[4], 
 								  new RoadNode[8], new RoadNode[5], 
 								  new RoadNode[10], new RoadNode[6], 
 								  new RoadNode[10], new RoadNode[5],
 								  new RoadNode[8], new RoadNode[4],
 								  new RoadNode[6]};
-	private TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
+	private static TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
 
 	public Tile getTileAt(int row, int col) {
 		return tiles[row][col];
@@ -261,3 +273,55 @@ public class Board {
 		return output;
 	}
 }
+
+/*
+ * old stuff I don't want to lose
+ * 
+ * if (r < 5) {
+		other_r = r - 1;
+		other_c = c * 2;
+		if (onBoard(other_r, other_c)) {
+			linkReference(constructors[r][c], constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+			index++;
+		}
+		other_c++; // other_c = c * 2 + 1;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			index++;
+		}
+		other_r = r + 1;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			index++;
+		}
+		other_c++; // other_c = c * 2 + 2
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			//index++; don't need this, function ends
+		}
+	}
+	else {
+		other_r = r - 1;
+		other_c = c * 2 + 1;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			index++;
+		}
+		other_c++; // other_c = c * 2 + 2;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			index++;
+		}
+		other_r = r + 1;
+		other_c = c * 2;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			index++;
+		}
+		other_c++; // other_c = c * 2 + 1;
+		if (onBoard(other_r, other_c)) {
+			linkRoadReference(r, c, other_r, other_c, index, constructors);
+			//index++; not needed, function ends
+		}
+	}
+	*/
