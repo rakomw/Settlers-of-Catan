@@ -36,6 +36,23 @@ public class HumanPlayer {
 			}
 		}
 	}
+	public ArrayList<Integer> get_ports() {
+		private ArrayList<Integer> ports = new ArrayList<Integer>();
+		for (int i=0;i<towns.size();i++) {
+			if (towns.get(i).get_trader()) {
+				get_ports.add(towns.get(i).get_trade_stats());
+			}
+		}
+		boolean has_3 = false;
+		for (int i=0;i<towns.size();i++) {
+			if (towns.get(i) == 5 && has_3 == false) {
+				has_3 = true;
+			}
+			else if (towns.get(i) == 5) {
+				towns.remove(i);
+			}
+		}
+	}
 	
 	public int get_roads() {
 	  return roads.size();
