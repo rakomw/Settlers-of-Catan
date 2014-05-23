@@ -16,8 +16,11 @@ public class HumanPlayer {
 	private ArrayList<TownNode> towns = new ArrayList<TownNode>();
 	private ArrayList<RoadNode> roads = new ArrayList<RoadNode>();
 	private ArrayList<Integer> hand = new ArrayList<Integer>();
-   private ArrayList<Card> development = new ArrayList<Card>();
+        private ArrayList<Card> development = new ArrayList<Card>();
+        private int knights;
 	private Menu menu;
+	private boolean longest_road;
+	private boolean largest_army;
 	private static Deck deck = new Deck();
 	
 	private void resourceProduction() {
@@ -33,7 +36,45 @@ public class HumanPlayer {
 			}
 		}
 	}
+	public ArrayList<Integer> get_ports() {
+		private ArrayList<Integer> ports = new ArrayList<Integer>();
+		for (int i=0;i<towns.size();i++) {
+			if (towns.get(i).get_trader()) {
+				get_ports.add(towns.get(i).get_trade_stats());
+			}
+		}
+		boolean has_3 = false;
+		for (int i=0;i<towns.size();i++) {
+			if (towns.get(i) == 5 && has_3 == false) {
+				has_3 = true;
+			}
+			else if (towns.get(i) == 5) {
+				towns.remove(i);
+			}
+		}
+	}
 	
+	public int get_roads() {
+	  return roads.size();
+	}
+	public int get_knights() {
+		return knights;
+	}
+	public int get_points() {
+		int points;
+		for (int i=0;i<towns.size();i++) {
+			points += towns.get(i);	
+		}
+		if (longest_road == true) {
+			points++;
+			points++;
+		}
+		if (largest_army == true) {
+			points++;
+			points++;
+		}
+		return points;
+	}
 	private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
      //call menus as players want and get function calls for below
 	}

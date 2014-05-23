@@ -35,7 +35,7 @@ public class GameController {
 	}
 	
 	private static void gameplay() {
-
+		//check for longest road and most knights, check everyones points
 	}
 
 	private static void endGame() {
