@@ -71,7 +71,7 @@ public class TownNode extends Node {
 	public boolean get_trader() {
 	  return is_trader;
 	}
-   public int get_trade_stats() {
-	  return trade_stats;//0-4 commodities 2/1 and 5 is general 3/1
+   	public int get_trade_stats() {
+		  return trade_stats;//0-4 commodities 2/1 and 5 is general 3/1
 	}
 }
