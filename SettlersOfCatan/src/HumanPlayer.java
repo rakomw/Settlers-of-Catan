@@ -37,21 +37,22 @@ public class HumanPlayer {
 		}
 	}
 	public ArrayList<Integer> get_ports() {
-		private ArrayList<Integer> ports = new ArrayList<Integer>();
+		ArrayList<Integer> ports = new ArrayList<Integer>();
 		for (int i=0;i<towns.size();i++) {
 			if (towns.get(i).get_trader()) {
-				get_ports.add(towns.get(i).get_trade_stats());
+				ports.add(towns.get(i).get_trade_stats());
 			}
 		}
 		boolean has_3 = false;
 		for (int i=0;i<towns.size();i++) {
-			if (towns.get(i) == 5 && has_3 == false) {
+			if (towns.get(i).get_trade_stats() == 5 && has_3 == false) {
 				has_3 = true;
 			}
-			else if (towns.get(i) == 5) {
+			else if (towns.get(i).get_trade_stats() == 5) {
 				towns.remove(i);
 			}
 		}
+      return ports;
 	}
 	
 	public int get_roads() {
@@ -61,9 +62,9 @@ public class HumanPlayer {
 		return knights;
 	}
 	public int get_points() {
-		int points;
+		int points = 0;
 		for (int i=0;i<towns.size();i++) {
-			points += towns.get(i);	
+			points += towns.get(i).get_level();	
 		}
 		if (longest_road == true) {
 			points++;
