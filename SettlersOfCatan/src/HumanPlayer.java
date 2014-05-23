@@ -2,9 +2,8 @@ import java.util.ArrayList;
 import java.awt.Color;
 
 public class HumanPlayer {
-	public HumanPlayer(Color in_color, Menu in_menu) {
+	public HumanPlayer(Color in_color) {
 		color = new Color(in_color.getRGB());
-		menu = in_menu;
 	}
 	
 	public void takeTurn() {
@@ -17,7 +16,6 @@ public class HumanPlayer {
 	private ArrayList<RoadNode> roads = new ArrayList<RoadNode>();
 	private ArrayList<Integer> hand = new ArrayList<Integer>();
    private ArrayList<Card> development = new ArrayList<Card>();
-	private Menu menu;
 	private static Deck deck = new Deck();
 	
 	private void resourceProduction() {
