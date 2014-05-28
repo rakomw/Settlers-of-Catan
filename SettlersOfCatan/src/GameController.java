@@ -12,6 +12,7 @@ public class GameController {
 	private static int victory_points;
 	private static ArrayList<HumanPlayer> players;
 	private static int turn;
+   private static HumanPlayer current_player;
 	private static JMenuBar menu_bar;
 	
 	public static void main(String[] args) {
@@ -29,11 +30,11 @@ public class GameController {
 		frame.getContentPane().add(start_menu);
 		frame.setVisible(true);
 	}
-	public static void beginGame(int x){
+	public static void beginGame(int p){
 		turn=0;
 		start_menu.setVisible(false);
 		players= new ArrayList<HumanPlayer>();
-		num_players = x;
+		num_players = p;
 		if(num_players==3)
 			victory_points=10;
 		else{
@@ -98,6 +99,9 @@ public class GameController {
 		frame.setJMenuBar(menu_bar);
 	}
 	
+   public static void nextTurn(){
+      current_player=players.get(turn++);
+   }
 	
 	
 	private static class RoadListener implements ActionListener{
@@ -117,7 +121,28 @@ public class GameController {
 	}
 	private static class BankListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			
+         /*String harbors_message = "";
+         if(current_player.hasGenericHarbor())
+            harbors_message+="You can sell any resource at 3:1";
+         if(current_player.hasLumberHarbor())
+            harbors_message+="You can sell Lumber at 2:1";
+         if(current_player.hasOreHarbor())
+            harbors_message+="You can sell Ore at 2:1";
+         if(current_player.hasBrickHarbor())
+            harbors_message+="You can sell Brick at 2:1";
+         if(current_player.hasWoolHarbor())
+         
+         if(current_player.hasGrainHarbor())
+         */
+			String[] buy_options = {"Lumber","Ore","Brick","Wool","Grain"};
+         String resource_buying = (String)JOptionPane.showInputDialog(frame,
+            "Which resouce will you buy?", "Trading Overseas",JOptionPane.QUESTION_MESSAGE,
+            null,buy_options,buy_options[0]);
+         String[] sell_options = {"Lumber", "Ore", "Brick", "Wool", "Grain"};
+         String resource_selling = (String)JOptionPane.showInputDialog(frame,
+         "Which resource will you sell for " + resource_buying + "?","Trading Overseas",
+         JOptionPane.QUESTION_MESSAGE,null,sell_options,sell_options[0]);        
+         
 		}
 	}
 	private static class TradeListener implements ActionListener{
@@ -145,4 +170,8 @@ public class GameController {
 			
 		}
 	}
+   private static boolean hasHarbor(HumanPlayer p, int harbor_type){
+      ArrayList<Integer> ports = p.get_ports();
+      return true;
+   }
 }

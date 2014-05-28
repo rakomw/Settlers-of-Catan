@@ -14,4 +14,11 @@ public class Tile {
 	public static final int WOOL = 3;
 	public static final int GRAIN = 4;
 	public static final int DESERT = 5;
+   
+   public boolean getRobber(){
+      return has_robber;
+   }
+   public void giveRobber(boolean b){
+      has_robber=b;
+   }
 }
