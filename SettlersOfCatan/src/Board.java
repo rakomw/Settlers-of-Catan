@@ -1,33 +1,36 @@
 public class Board {
-	private static Board instance;
-	public Board getInstance() { // board should only be instantiated once
-		if (instance == null) {
-			return new Board();
-		}
-		else {
-			return null;
-		}
-	}
-	
-	private Board() {
+	// all array indexes represent row-major item locations on the map
+	private static Tile[][] tiles = {new Tile[3], new Tile[4], new Tile[5], new Tile[4], new Tile[3]};
+	private static int[] robber_loc = new int[2];
+	private static final int total_tiles = 19;
+	//even rows are diagonal, odd are vertical
+	private static RoadNode[][] roads = {new RoadNode[6], new RoadNode[4], 
+								  new RoadNode[8], new RoadNode[5], 
+								  new RoadNode[10], new RoadNode[6], 
+								  new RoadNode[10], new RoadNode[5],
+								  new RoadNode[8], new RoadNode[4],
+								  new RoadNode[6]};
+	private static TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
+
+	public Board() {
 		// put tiles onto the map
 		int tile_count = 0, r = 0, c = 0;
 		for (; r < tiles.length; r++) {
 			for (; c < tiles[r].length; c++) {
 				if (tile_count < 3) {
-					tiles[r][c] = new Tile(Tile.BRICK, (int)(Math.random() * 10) + 2);
+					tiles[r][c] = new Tile(Tile.BRICK, (int)(Math.random() * 11) + 2);
 				}
 				else if (tile_count < 6) {
-					tiles[r][c] = new Tile(Tile.ORE, (int)(Math.random() * 10) + 2);
+					tiles[r][c] = new Tile(Tile.ORE, (int)(Math.random() * 11) + 2);
 				}
 				else if (tile_count < 10) {
-					tiles[r][c] = new Tile(Tile.GRAIN, (int)(Math.random() * 10) + 2);
+					tiles[r][c] = new Tile(Tile.GRAIN, (int)(Math.random() * 11) + 2);
 				}
 				else if (tile_count < 14) {
-					tiles[r][c] = new Tile(Tile.WOOL, (int)(Math.random() * 10) + 2);
+					tiles[r][c] = new Tile(Tile.WOOL, (int)(Math.random() * 11) + 2);
 				}
 				else if (tile_count < 18) {
-					tiles[r][c] = new Tile(Tile.LUMBER, (int)(Math.random() * 10) + 2);
+					tiles[r][c] = new Tile(Tile.LUMBER, (int)(Math.random() * 11) + 2);
 				}
 				else {
 					tiles[r][c] = new Tile(Tile.DESERT, -1);
@@ -264,6 +267,7 @@ public class Board {
 		}
 	}
 	
+	// helper method for town construction, doesn't need to add road references
 	private void constructTowns(final int r, final int c, final TownNode[][][] constructors) {
 		int other_r = r, 
 			other_c = c - 1;
@@ -276,6 +280,22 @@ public class Board {
 		}
 		if (r < 3) { // in the north of the board
 			if (r % 2 == 0) {
+				other_r = r + 1;
+				other_c = c + 1;
+				if (onBoard(towns, other_r, other_c)) {
+					linkReference(constructors[r][c], constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+			else {
+				other_r = r - 1;
+				other_c = c - 1;
+				if (onBoard(towns, other_r, other_c)) {
+					linkReference(constructors[r][c], constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+		}
+		else { // in the south of the board
+			if (r % 2 == 0) {
 				other_r = r - 1;
 				other_c = c - 1;
 				if (onBoard(towns, other_r, other_c)) {
@@ -283,15 +303,11 @@ public class Board {
 				}
 			}
 			else {
-				
-			}
-		}
-		else { // in the south of the board
-			if (r % 2 == 0) {
-				
-			}
-			else {
-				
+				other_r = r + 1;
+				other_c = c + 1;
+				if (onBoard(towns, other_r, other_c)) {
+					linkReference(constructors[r][c], constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
 			}
 		}
 	}
@@ -327,25 +343,15 @@ public class Board {
 		}
 	}
 	
-	// all array indexes represent row-major item locations on the map
-	private static Tile[][] tiles = {new Tile[3], new Tile[4], new Tile[5], new Tile[4], new Tile[3]};
-	private static int[] robber_loc = new int[2];
-	private static final int total_tiles = 19;
-	//even rows are diagonal, odd are vertical
-	private static RoadNode[][] roads = {new RoadNode[6], new RoadNode[4], 
-								  new RoadNode[8], new RoadNode[5], 
-								  new RoadNode[10], new RoadNode[6], 
-								  new RoadNode[10], new RoadNode[5],
-								  new RoadNode[8], new RoadNode[4],
-								  new RoadNode[6]};
-	private static TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
-
 	public Tile getTileAt(int row, int col) {
 		return tiles[row][col];
 	}
 	
-	public void moveRobber() {
-		
+	public void moveRobber(final int r, final int c) {
+		tiles[robber_loc[0]][robber_loc[1]].has_robber = false;
+		robber_loc[0] = r;
+		robber_loc[1] = c;
+		tiles[r][c].has_robber = true;
 	}
 	
 	public int[] getRobberLoc() {

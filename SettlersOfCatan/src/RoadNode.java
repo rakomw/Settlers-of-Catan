@@ -13,13 +13,14 @@ public class RoadNode extends Node {
 	private final RoadNode[] adj_roads; // adjacent towns and roads
 	private final TownNode[] adj_towns;
 	
-	public void buildUp(HumanPlayer in_owner) throws Exception {
+	public boolean buildUp(HumanPlayer in_owner) {
 		if (level == 1) {
-			throw new Exception();
+			return false;
 		}
 		
 		level = 1;
 		owner = in_owner;
+		return true;
 	}
 	
 	public boolean isBuildable(HumanPlayer prospector) {

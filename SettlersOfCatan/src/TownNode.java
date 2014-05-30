@@ -15,20 +15,22 @@ public class TownNode extends Node {
 	private final RoadNode[] adj_roads;
 	private final TownNode[] adj_towns;
 	
-	public void buildUp(HumanPlayer in_owner) throws Exception {
+	public boolean buildUp(HumanPlayer in_owner) {
 		if (level < 3) {
 			level++;
 		}
 		else {
-			throw new Exception();
+			return false;
 		}
 		
 		if (owner == null) {
 			owner = in_owner;
 		}
 		else { // a previously built settlement is being replaced with a city of a diff owner
-			throw new Exception();
+			return false;
 		}
+		
+		return true;
 	}
 	
 	// returns true if there is an adjacent road owned by the same player
