@@ -63,7 +63,7 @@ public class HumanPlayer {
 	public int get_points() {
 		int points = 0;
 		for (int i=0;i<towns.size();i++) {
-			points += towns.get(i).get_level();	
+			points += towns.get(i).getBuildLevel();	
 		}
 		if (longest_road == true) {
 			points++;
@@ -95,7 +95,7 @@ public class HumanPlayer {
 		 }
 	}
 	//@param whether or not the trade can be done
-	private boolean trade(int[] to_remove,int[] addition) throws Exception {
+	public boolean trade(int[] to_remove,int[] addition){
 	  boolean has_commodity = false;
 	  for (int i=0;i<to_remove.length;i++) {
 	    for (int j=0;j<hand.size();j++) {
@@ -115,15 +115,14 @@ public class HumanPlayer {
 		 return true;
 	  }
 	  else {
-	    throw new Exception();
+	    return false;
 	  }
 	}
-	private void build_card() throws Exception {
-	  if (!deck.isEmpty()) {
+	public void addDevelopmentCard() {
+	  if (!deck.isEmpty()) 
 	    development.add(deck.deal());
-	  }
-	  else throw new Exception();
 	}
+   
 	/*private void build_ship() {
 	
 	} maybe???*/

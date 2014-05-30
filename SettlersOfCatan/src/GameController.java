@@ -14,6 +14,7 @@ public class GameController {
 	private static int turn;
    private static HumanPlayer current_player;
 	private static JMenuBar menu_bar;
+   private static Deck deck;
 	
 	public static void main(String[] args) {
 		/*String message = "This game is still in progress.\nDon't worry though, we have highly trained specialists hard at work";
@@ -31,7 +32,8 @@ public class GameController {
 		frame.setVisible(true);
 	}
 	public static void beginGame(int p){
-		turn=0;
+      deck=new Deck();
+		turn=(int)(Math.random()*p);
 		start_menu.setVisible(false);
 		players= new ArrayList<HumanPlayer>();
 		num_players = p;
@@ -46,6 +48,7 @@ public class GameController {
 		players.add(new HumanPlayer(Color.RED));
 		players.add(new HumanPlayer(Color.BLUE));
 		players.add(new HumanPlayer(Color.GREEN));
+      current_player=players.get(turn);
 		setUpMainGUI();
 	}
 	
@@ -121,29 +124,77 @@ public class GameController {
 	}
 	private static class BankListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-         /*String harbors_message = "";
-         if(current_player.hasGenericHarbor())
-            harbors_message+="You can sell any resource at 3:1";
-         if(current_player.hasLumberHarbor())
-            harbors_message+="You can sell Lumber at 2:1";
-         if(current_player.hasOreHarbor())
-            harbors_message+="You can sell Ore at 2:1";
-         if(current_player.hasBrickHarbor())
-            harbors_message+="You can sell Brick at 2:1";
-         if(current_player.hasWoolHarbor())
+         String harbors_message = "";
          
-         if(current_player.hasGrainHarbor())
-         */
+         boolean lumber_h = hasHarbor(current_player,0);
+         boolean ore_h = hasHarbor(current_player,1);
+         boolean brick_h = hasHarbor(current_player,2);
+         boolean wool_h = hasHarbor(current_player,3);
+         boolean grain_h = hasHarbor(current_player,4);
+         boolean generic_h = hasHarbor(current_player,5);
+         
+         if(lumber_h)
+            harbors_message+="You can sell Lumber at 2:1\n";
+         if(ore_h)            
+            harbors_message+="You can sell Ore at 2:1\n";
+         if(brick_h)
+            harbors_message+="You can sell Brick at 2:1\n";
+         if(wool_h)
+            harbors_message+="You can sell Wool at 2:1\n";
+         if(grain_h)
+            harbors_message+="You can sell Grain at 2:1\n";
+         if(generic_h)
+            harbors_message+="You can sell any resource at 3:1\n";
+         else
+            harbors_message+="You can sell any resource at 4:1\n";
+            
+         JOptionPane.showMessageDialog(frame,harbors_message);
 			String[] buy_options = {"Lumber","Ore","Brick","Wool","Grain"};
          String resource_buying = (String)JOptionPane.showInputDialog(frame,
             "Which resouce will you buy?", "Trading Overseas",JOptionPane.QUESTION_MESSAGE,
             null,buy_options,buy_options[0]);
+            
          String[] sell_options = {"Lumber", "Ore", "Brick", "Wool", "Grain"};
          String resource_selling = (String)JOptionPane.showInputDialog(frame,
          "Which resource will you sell for " + resource_buying + "?","Trading Overseas",
          JOptionPane.QUESTION_MESSAGE,null,sell_options,sell_options[0]);        
          
+         int bought_type = translate(resource_buying);
+         int sold_type = translate(resource_selling);
+         int[] sold;
+         int[] bought = new int[1];
+         bought[0] = bought_type;
+         if(hasHarbor(current_player,bought_type))
+            sold = new int[2];
+            
+         else if(hasHarbor(current_player,5))
+            sold = new int[3];
+         else
+            sold = new int[4];
+         
+         for(int k=0;k<sold.length;k++)
+               sold[k]=bought_type;
+         if(!current_player.trade(sold,bought))
+            JOptionPane.showMessageDialog(frame,"Can't trade what you don't have.");
 		}
+      private static int translate(String s){
+         if(s.equals("Lumber"))
+             return 0;
+         if(s.equals("Ore"))
+            return 1;
+         if(s.equals("Brick"))
+            return 2;
+         if(s.equals("Wool"))
+            return 3;
+         return 4;
+      }
+      private static boolean hasHarbor(HumanPlayer p, int harbor_type){
+         ArrayList<Integer> ports = p.get_ports();
+         for(Integer i:ports)
+          if(harbor_type==i)
+             return true;
+       return false;
+      }
 	}
 	private static class TradeListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
@@ -152,7 +203,18 @@ public class GameController {
 	}
 	private static class BuyDevelopmentListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			
+         int will_purchase = JOptionPane.showConfirmDialog(frame,"A development card costs one ore, one wool, and one grain\n"+
+         "Do you want to purchase one?","Development Card Purchase",JOptionPane.YES_NO_OPTION);
+         if(will_purchase==JOptionPane.YES_OPTION){
+			int[] paid = new int[3];
+         paid[0] = 1;
+         paid[1] = 3;
+         paid[2] = 4;
+         if(!current_player.trade(paid,null))
+            JOptionPane.showMessageDialog(frame,"You don't have the resources to buy a Development Card");
+         else
+            current_player.addDevelopmentCard();
+         }
 		}
 	}
 	private static class UseDevelopmentListener implements ActionListener{
@@ -170,8 +232,4 @@ public class GameController {
 			
 		}
 	}
-   private static boolean hasHarbor(HumanPlayer p, int harbor_type){
-      ArrayList<Integer> ports = p.get_ports();
-      return true;
-   }
 }

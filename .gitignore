@@ -32,3 +32,7 @@ SettlersOfCatan/.project
 *.class
 
 *.class
+
+*.class
+
+SettlersOfCatan/src/HumanPlayer.class
