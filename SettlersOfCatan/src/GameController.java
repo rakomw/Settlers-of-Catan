@@ -159,12 +159,17 @@ public class GameController {
          "Which resource will you sell for " + resource_buying + "?","Trading Overseas",
          JOptionPane.QUESTION_MESSAGE,null,sell_options,sell_options[0]);        
          
+         if(resource_buying.equals(resource_selling)){
+            JOptionPane.showMessageDialog(frame,"Selling a resource for a smaller amount of the same resource seems like a bad idea.\n"+
+            "I'm just going to assume that there was a mistake in there.");
+            return;
+         }
          int bought_type = translate(resource_buying);
          int sold_type = translate(resource_selling);
          int[] sold;
          int[] bought = new int[1];
          bought[0] = bought_type;
-         if(hasHarbor(current_player,bought_type))
+         if(hasHarbor(current_player,sold_type))
             sold = new int[2];
             
          else if(hasHarbor(current_player,5))
@@ -173,7 +178,7 @@ public class GameController {
             sold = new int[4];
          
          for(int k=0;k<sold.length;k++)
-               sold[k]=bought_type;
+               sold[k]=sold_type;
          if(!current_player.trade(sold,bought))
             JOptionPane.showMessageDialog(frame,"Can't trade what you don't have.");
 		}
@@ -213,7 +218,7 @@ public class GameController {
          if(!current_player.trade(paid,null))
             JOptionPane.showMessageDialog(frame,"You don't have the resources to buy a Development Card");
          else
-            current_player.addDevelopmentCard();
+            current_player.addDevelopmentCard(deck.deal());
          }
 		}
 	}

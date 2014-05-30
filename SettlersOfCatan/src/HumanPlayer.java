@@ -5,7 +5,7 @@ import java.awt.Color;
 
 public class HumanPlayer {
 	public HumanPlayer(Color in_color) {
-		color = new Color(in_color.getRGB());
+		color = in_color;
 	}
 
 	public void takeTurn() {
@@ -21,7 +21,6 @@ public class HumanPlayer {
    private int knights;
 	private boolean longest_road;
 	private boolean largest_army;
-	private static Deck deck = new Deck();
 
 	private void resourceProduction() {
 		int roll = (int)(Math.random() * 6) + (int)(Math.random() * 6) + 2;
@@ -42,14 +41,6 @@ public class HumanPlayer {
 			if (t.get_trader()) {
 				ports.add(t.get_trade_stats());
 			}
-		}
-		boolean has_3 = false;
-		for (TownNode t:towns) {
-			if (t.get_trade_stats() == 5 && has_3 == false)
-				has_3 = true;
-            
-			else if (t.get_trade_stats() == 5)
-				towns.remove(t);
 		}
       return ports;
 	}
@@ -94,33 +85,34 @@ public class HumanPlayer {
 
 		 }
 	}
-	//@param whether or not the trade can be done
-	public boolean trade(int[] to_remove,int[] addition){
-	  boolean has_commodity = false;
-	  for (int i=0;i<to_remove.length;i++) {
-	    for (int j=0;j<hand.size();j++) {
-	      if (to_remove[i] == hand.get(j)) {
-		     has_commodity = true;
-		  	  to_remove[i] = j;
-		   }
-	    }
-	  }
-	  if (has_commodity) {
-	    for (int i=0;i<to_remove.length;i++) {
-	      hand.remove(to_remove[i]);
-		 }
-		 for (int i=0;i<addition.length;i++) {
-		   hand.add(addition[i]);
-		 }
-		 return true;
-	  }
-	  else {
-	    return false;
-	  }
+	
+	public void trade(int[] to_remove,int[] addition){
+      if(hasResources(to_remove)){
+         for(int i:to_remove)
+            hand.remove(Integer.valueOf(i));
+            /*Integer.valueOf is used to make an Integer object and prevent Arraylist
+            from interpreting it as an index*/
+         for(int i:addition)
+            hand.add(i);
+      }
 	}
-	public void addDevelopmentCard() {
-	  if (!deck.isEmpty()) 
-	    development.add(deck.deal());
+   
+   private boolean hasResources(int[] removing){
+      int[] count_taking = {0,0,0,0,0};
+      int[] count_possessed = {0,0,0,0,0};
+      for(int i:removing)
+         count_taking[i]++;
+      for(Integer i:hand)
+         count_possessed[i]++;
+      
+      for(int k=0;k<count_taking.length;k++)
+         if(count_taking[k]>count_possessed[k])
+            return false;
+            
+      return true;
+   }
+	public void addDevelopmentCard(Card dev) {
+	  development.add(dev);
 	}
    
 	/*private void build_ship() {

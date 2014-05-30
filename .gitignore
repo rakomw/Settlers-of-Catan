@@ -36,3 +36,11 @@ SettlersOfCatan/.project
 *.class
 
 SettlersOfCatan/src/HumanPlayer.class
+
+*.class
+
+SettlersOfCatan/src/TownNode.class
+
+*.class
+
+*.class
