@@ -53,45 +53,37 @@ public class HumanPlayer {
       return ports;
    }
 
-   public int get_roads() {
+   public int get_num_roads() {
       return roads.size();
    }
-   public int get_knights() {
+   public int get_num_knights() {
       return knights;
    }
    public int get_points() {
       int points = 0;
-      for (int i=0;i<towns.size();i++) {
+      for (int i=0;i<towns.size();i++) 
          points += towns.get(i).getBuildLevel();	
-      }
-      if (longest_road == true) {
-         points++;
-         points++;
-      }
-      if (largest_army == true) {
-         points++;
-         points++;
-      }
+      
+      if (longest_road) 
+         points+=2;
+      
+      if (largest_army) 
+         points+=2;
+      
       return points;
    }
 	//private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
      //call menus as players want and get function calls for below
 	//}
    private void build_road(RoadNode rode) {
-      try {
+    
          rode.buildUp(this);
-      }
-      catch(Exception e) {
-      
-      }
+
    }
    private void build_town(TownNode toun) {
-      try { 
-         toun.buildUp(this);
-      }
-      catch(Exception e) {
       
-      }
+         toun.buildUp(this);
+      
    }
 	
    public boolean trade(int[] to_remove,int[] addition){

@@ -1,4 +1,3 @@
-import java.lang.Exception;
 
 public class TownNode extends Node {
 	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns,boolean trader,int trader_stats) {

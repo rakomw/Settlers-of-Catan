@@ -1,4 +1,3 @@
-import java.lang.Exception;
 
 public class RoadNode extends Node {
 	public RoadNode(RoadNode[] in_roads, TownNode[] in_towns) {
