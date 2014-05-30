@@ -242,14 +242,15 @@ public class GameController {
 	}
 	private static class UseDevelopmentListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			
+		   
 		}
 	}
 	private static class ViewDevCardListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
 		   ArrayList<Card> cards = current_player.getDevelopmentCards();
-         cards.addAll(deck.deal(5));
          String message = "You have:\n";
+         if(cards.size()==0)
+            message+="No development cards";
          for(Card c:cards)
             message+=c;
          JOptionPane.showMessageDialog(frame,message);

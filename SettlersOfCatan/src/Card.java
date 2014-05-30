@@ -5,7 +5,7 @@ public class Card {
   public Card(int type) {
     switch(type) {
       case 0: {
-	     suit = "Knight(move the robber and take a card from a player with a settlement adjacent to the new location";
+	     suit = "Knight(move the robber and take a card from a player with a settlement adjacent to the new location)";
         break;
 	   }
 	   case 1: {

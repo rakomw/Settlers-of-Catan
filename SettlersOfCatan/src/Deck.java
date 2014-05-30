@@ -42,21 +42,14 @@ public class Deck {
       return a;
   }
   public void shuffle() {
-    if (cards.size() < MAX)
-			return;
-	   Random gen = new Random();
-		
-		Card[] array = new Card[MAX];
-		while (cards.size() > 0){
-			Card card = cards.remove(cards.size() - 1);
-			int i = gen.nextInt(MAX);
-			while (array[i] != null)
-				i = gen.nextInt(MAX);
-			array[i] = card;
-		}
-		
-		for (Card card: array)
-			cards.add(card);
+      for(int k=0;k<10000;k++){
+         int a= (int)(Math.random()*cards.size());
+         int b= (int)(Math.random()*cards.size());
+         Card temp = cards.get(a);
+         
+         cards.set(a,cards.get(b));
+         cards.set(b,temp);
+      }
   }
   public String toString() {
     String result = "";
