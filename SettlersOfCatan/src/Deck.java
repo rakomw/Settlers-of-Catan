@@ -21,6 +21,7 @@ public class Deck {
     cards.add(new Card(3));
     cards.add(new Card(4));
 	 cards.add(new Card(4));
+    shuffle();
   }
   public boolean isEmpty() {
     return cards.isEmpty();
@@ -34,23 +35,28 @@ public class Deck {
     }
     else return cards.remove(cards.size() - 1);
   }
+  public ArrayList<Card> deal(int n){
+      ArrayList<Card> a = new ArrayList<Card>();
+      for(int k=0;k<n;k++)
+         a.add(cards.remove(cards.size()-1));
+      return a;
+  }
   public void shuffle() {
-    if (cards.size() < MAX) {
-      return;
-    }
-    Random gen = new Random();
-    Card[] array = new Card[MAX];
-    while (cards.size() > 0) {
-      Card card = cards.remove(cards.size() - 1);
-	   int i = gen.nextInt(MAX);
-      while (array[i] != null) {
-        i = gen.nextInt(MAX);
-        array[i] = card;
-      }
-    }
-    for (Card card: array) {
-      cards.add(card);
-    }
+    if (cards.size() < MAX)
+			return;
+	   Random gen = new Random();
+		
+		Card[] array = new Card[MAX];
+		while (cards.size() > 0){
+			Card card = cards.remove(cards.size() - 1);
+			int i = gen.nextInt(MAX);
+			while (array[i] != null)
+				i = gen.nextInt(MAX);
+			array[i] = card;
+		}
+		
+		for (Card card: array)
+			cards.add(card);
   }
   public String toString() {
     String result = "";

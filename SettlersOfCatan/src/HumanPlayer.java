@@ -118,7 +118,12 @@ public class HumanPlayer {
    public void addDevelopmentCard(Card dev) {
       development.add(dev);
    }
-   
+   public ArrayList<Integer> getResourceCards(){
+      return hand;
+   }
+   public ArrayList<Card> getDevelopmentCards(){
+      return development;
+   }
 	/*private void build_ship() {
 	
 	} maybe???*/

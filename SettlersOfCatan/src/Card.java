@@ -5,23 +5,23 @@ public class Card {
   public Card(int type) {
     switch(type) {
       case 0: {
-	     suit = "knight";
+	     suit = "Knight(move the robber and take a card from a player with a settlement adjacent to the new location";
         break;
 	   }
 	   case 1: {
-		  suit = "free_point";
+		  suit = "Victory point(reveal when you can end the game)";
         break;
 	   }
 	   case 2: {
-		  suit = "monopoly";
+		  suit = "Monopoly(take all of the player supply of one resource)";
         break;
 	   }
 	   case 3: {
-		  suit = "roads";
+		  suit = "Two free roads";
         break;
 		}
 	   case 4: {
-		  suit = "free_stuff";
+		  suit = "Year of Plenty(take any two resource cards from the bank)";
         break;
 	   }
 	 }

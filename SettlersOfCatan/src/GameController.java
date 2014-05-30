@@ -5,7 +5,7 @@ import java.awt.event.*;
 import java.util.*;
 
 public class GameController {
-	private static JFrame frame;
+	public static JFrame frame;
 	private static StartMenu start_menu;
 	private static GameGUI game_gui;
 	private static int num_players;
@@ -14,6 +14,7 @@ public class GameController {
 	private static int turn;
    private static HumanPlayer current_player;
 	private static JMenuBar menu_bar;
+   //private static Board board;
    private static Deck deck;
 	
 	public static void main(String[] args) {
@@ -82,6 +83,7 @@ public class GameController {
 		trade_menu.add(bank_trade);
 		trade_menu.add(player_trade);
 		trade_menu.add(view_resource);
+      
 		menu_bar.add(trade_menu);
 		
 		
@@ -98,6 +100,7 @@ public class GameController {
 		card_menu.add(buy_development);
 		card_menu.add(play_development);
 		menu_bar.add(card_menu);
+      
 		
 		frame.setJMenuBar(menu_bar);
 	}
@@ -105,6 +108,31 @@ public class GameController {
    public static void nextTurn(){
       current_player=players.get(turn++);
    }
+   
+   public static int translate(String s){
+         if(s.equals("Lumber"))
+             return 0;
+         if(s.equals("Ore"))
+            return 1;
+         if(s.equals("Brick"))
+            return 2;
+         if(s.equals("Wool"))
+            return 3;
+         if(s.equals("Grain"))
+            return 4;
+         return -1;
+    }
+    
+    public static String translate(int n){
+      switch(n){
+         case 0:return "Lumber";
+         case 1:return "Ore";
+         case 2:return "Brick";
+         case 3:return "Wool";
+         case 4:return "Grain";
+         default: return "Not a resource";
+      }  
+    }
 	
 	
 	private static class RoadListener implements ActionListener{
@@ -182,17 +210,7 @@ public class GameController {
          if(!current_player.trade(sold,bought))
             JOptionPane.showMessageDialog(frame,"Can't trade what you don't have.");
 		}
-      private static int translate(String s){
-         if(s.equals("Lumber"))
-             return 0;
-         if(s.equals("Ore"))
-            return 1;
-         if(s.equals("Brick"))
-            return 2;
-         if(s.equals("Wool"))
-            return 3;
-         return 4;
-      }
+      
       private static boolean hasHarbor(HumanPlayer p, int harbor_type){
          ArrayList<Integer> ports = p.get_ports();
          for(Integer i:ports)
@@ -229,12 +247,26 @@ public class GameController {
 	}
 	private static class ViewDevCardListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			
+		   ArrayList<Card> cards = current_player.getDevelopmentCards();
+         cards.addAll(deck.deal(5));
+         String message = "You have:\n";
+         for(Card c:cards)
+            message+=c;
+         JOptionPane.showMessageDialog(frame,message);
 		}
 	}
 	private static class ViewResourceCardListener implements ActionListener{
 		public void actionPerformed(ActionEvent e){
-			
+			ArrayList<Integer> cards = current_player.getResourceCards();
+         String message = "You have:\n";
+         int[] count = {0,0,0,0,0};
+         for(int i:cards)
+            count[i]++;
+         
+         for(int k=0;k<count.length;k++)
+            message+=count[k]+" " + translate(k)+"\n";
+         
+         JOptionPane.showMessageDialog(frame,message);
 		}
 	}
 }
