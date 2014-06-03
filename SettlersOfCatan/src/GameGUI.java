@@ -232,7 +232,101 @@ public class GameGUI extends JPanel{
    }
    private static class UseDevelopmentListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+       	ArrayList<Card> int_options = current_player.getDevelopmentCards();
+       	ArrayList<String> options = new ArrayList<String>();
+	for (int i=0;i<int_options.size();i++) {
+	 switch (int_options.get(i).get_suit()) {
+           case 0: {
+             options.add("Knight");
+             break;
+           }
+           case 1: {
+             options.add("Free Point");
+             break;
+           }
+           case 2: {
+             options.add("Monopoly");
+             break;
+           }
+           case 3: {
+             options.add("Road Building");
+             break;
+           }
+           case 4: {
+             options.add("Year of Plenty");
+             break;
+           }
+         }
+       }
+       Object[] option_arr = options.toArray();
+       String full_input = (String)JOptionPane.showInputDialog(frame, "what card would you like to use?",
+       "development card usage",JOptionPane.QUESTION_MESSAGE,null,option_arr,option_arr[0]);
+       String input = full_input.substring(0,1);
+       
+       int use;
+       if (input.equals("K")) {
+         use = 0;
+       }
+       if (input.equals("F")) {
+         use = 1;
+       }
+       if (input.equals("M")) {
+         use = 2;
+       }
+       if (input.equals("R")) {
+         use = 3;
+       }
+       if (input.equals("Y")) {
+         use = 4;
+       }
+       else use = -1;
+       switch (use) {
+         case 0: {
+           current_player.add_knight();
+           // call the roll 7 function
+           break;
+         }           
+         case 1: {
+           current_player.free_points_plus();
+           break;
+         }       
+         case 2: {           
+           String[] les_options = {"Lumber","Ore","Brick","Wool","Grain"};
+           String plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
+           "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
+           int resource = translate(plenty);
+           int[] res = {resource};
+           
+           for (int i=0;i<players.size();i++) {
+             if (!players.get(i).equals(current_player)) {
+               while (players.get(i).trade(res, null)) {
+                 players.get(i).trade(res, null); 
+                 current_player.trade(null, res);
+               }
+             }
+           }           
+           break;
+         }
+         case 3: {
+           RoadNode place1 = null;
+           //player input @ TODO SIR ROBERT
+           current_player.build_road(place1);
          
+           RoadNode place2 = null;
+           //player input
+           current_player.build_road(place2);
+           break;
+         }           
+         case 4: {                        
+           String[] the_options = {"Lumber","Ore","Brick","Wool","Grain"};
+           String plenty =  (String)JOptionPane.showInputDialog(frame, "you used Year of Plenty: choose your resource",
+           "Year of Plenty",JOptionPane.QUESTION_MESSAGE,null,the_options,the_options[0]);
+           int resource = translate(plenty);
+           int[] trades = {resource};
+           current_player.trade(null, trades);
+           break;
+         }
+       } 
       }
    }
    private static class ViewDevCardListener implements ActionListener{
