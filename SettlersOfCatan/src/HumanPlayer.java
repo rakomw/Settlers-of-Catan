@@ -24,14 +24,7 @@ public class HumanPlayer {
       largest_army=false;
    }
 
-   public void takeTurn() {
-      resourceProduction();
-   	//tradeAndBuild();
-   }
-
-
-   private void resourceProduction() {
-      int roll = (int)(Math.random() * 6) + (int)(Math.random() * 6) + 2;
+   public void resourceProduction(int roll) {
       for (TownNode town : towns) {
          for (Tile tile : town.getAdjacentTiles()) {
             if (tile.roll == roll && !tile.has_robber) {
