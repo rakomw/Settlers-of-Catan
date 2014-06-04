@@ -49,6 +49,12 @@ public class HumanPlayer {
    public ArrayList<TownNode> getTowns(){
       return towns;
    }
+   public void add_knight() {
+   	knights++;
+   }
+   public void free_points_plus() {
+     free_points++;
+   }
    public int get_num_roads() {
       return roads.size();
    }
@@ -71,10 +77,10 @@ public class HumanPlayer {
 	//private void tradeAndBuild() { //use this to call menus to get inputs for seperate helper functions?
      //call menus as players want and get function calls for below
 	//}
-   private void build_road(RoadNode rode) {
+   public void build_road(RoadNode rode) {
       rode.buildUp(this);
    }
-   private void build_town(TownNode toun) {
+   public void build_town(TownNode toun) {
       toun.buildUp(this);  
    }
 	
