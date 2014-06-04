@@ -1,9 +1,16 @@
 public class Card {
  
   String suit = "";
+  int suit_val;
  
   public Card(int type) {
-    switch(type) {
+    suit_val = type;
+  }
+  public int get_suit() {
+    return suit_val;
+  }
+  public String toString() {
+    switch(suit_val) {
       case 0: {
 	     suit = "Knight(move the robber and take a card from a player with a settlement adjacent to the new location)";
         break;
@@ -17,7 +24,7 @@ public class Card {
         break;
 	   }
 	   case 3: {
-		  suit = "Two free roads";
+		  suit = "Road Building(Two free roads)";
         break;
 		}
 	   case 4: {
@@ -25,11 +32,6 @@ public class Card {
         break;
 	   }
 	 }
-  }
-  public String get_suit() {
-    return suit;
-  }
-  public String toString() {
     return suit + "\n";
   }
 }
