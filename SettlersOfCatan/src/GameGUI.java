@@ -401,7 +401,7 @@ public class GameGUI extends JPanel{
        switch (use) {
          case 0: {
            current_player.add_knight();
-           // call the roll 7 function
+           doRobber();
            break;
          }           
          case 1: {
@@ -410,16 +410,20 @@ public class GameGUI extends JPanel{
          }       
          case 2: {           
            String[] les_options = {"Lumber","Ore","Brick","Wool","Grain"};
-           String plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
-           "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
+           String plenty;
+           do{
+               plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
+               "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
+           }while(plenty==null);
+           
            int resource = translate(plenty);
            int[] res = {resource};
            
            for (int i=0;i<players.size();i++) {
              if (!players.get(i).equals(current_player)) {
-               while (players.get(i).trade(res, null)) {
-                 players.get(i).trade(res, null); 
-                 current_player.trade(null, res);
+               while (players.get(i).hasResources(res)) {
+                 players.get(i).trade(res, new int[0]); 
+                 current_player.trade(new int[0], res);
                }
              }
            }           
@@ -437,11 +441,18 @@ public class GameGUI extends JPanel{
          }           
          case 4: {                        
            String[] the_options = {"Lumber","Ore","Brick","Wool","Grain"};
-           String plenty =  (String)JOptionPane.showInputDialog(frame, "you used Year of Plenty: choose your resource",
-           "Year of Plenty",JOptionPane.QUESTION_MESSAGE,null,the_options,the_options[0]);
-           int resource = translate(plenty);
-           int[] trades = {resource};
-           current_player.trade(null, trades);
+           int[] trades = new int[2];
+           for(int k=0;k<2;k++){
+               String plenty;
+               do{
+                  plenty =  (String)JOptionPane.showInputDialog(frame, "you used Year of Plenty: choose your resource",
+                     "Year of Plenty",JOptionPane.QUESTION_MESSAGE,null,the_options,the_options[0]);
+               }while(plenty==null);
+               
+               trades[k] = translate(plenty);
+               
+           }
+           current_player.trade(new int[0], trades);
            break;
          }
        } 
