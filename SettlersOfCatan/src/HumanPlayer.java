@@ -46,6 +46,9 @@ public class HumanPlayer {
       return ports;
    }
 
+   public ArrayList<TownNode> getTowns(){
+      return towns;
+   }
    public int get_num_roads() {
       return roads.size();
    }
@@ -69,14 +72,10 @@ public class HumanPlayer {
      //call menus as players want and get function calls for below
 	//}
    private void build_road(RoadNode rode) {
-    
-         rode.buildUp(this);
-
+      rode.buildUp(this);
    }
    private void build_town(TownNode toun) {
-      
-         toun.buildUp(this);
-      
+      toun.buildUp(this);  
    }
 	
    public boolean trade(int[] to_remove,int[] addition){
@@ -94,7 +93,7 @@ public class HumanPlayer {
          return false;
    }
    
-   private boolean hasResources(int[] removing){
+   public boolean hasResources(int[] removing){
       int[] count_taking = {0,0,0,0,0};
       int[] count_possessed = {0,0,0,0,0};
       for(int i:removing)
@@ -117,7 +116,21 @@ public class HumanPlayer {
    public ArrayList<Card> getDevelopmentCards(){
       return development;
    }
-	/*private void build_ship() {
 	
-	} maybe???*/
+   public String toString(){
+      String name = "The ";
+      
+      if(color.equals(Color.RED))
+         name+="Red ";
+      else if(color.equals(Color.GREEN))
+         name+="Green ";
+      else if(color.equals(Color.BLUE))
+         name+="Blue ";
+      else if(color.equals(Color.ORANGE))
+         name+="Orange ";
+         
+      name+="Player";
+      return name;
+   }
+   
 }
