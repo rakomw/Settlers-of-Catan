@@ -12,6 +12,7 @@ public class HumanPlayer {
    private int knights;
    private boolean longest_road;
    private boolean largest_army;
+   private int free_points;
    
    public HumanPlayer(Color in_color) {
       color = in_color;
@@ -62,7 +63,7 @@ public class HumanPlayer {
       return knights;
    }
    public int get_points() {
-      int points = 0;
+      int points = free_points;
       for (int i=0;i<towns.size();i++) 
          points += towns.get(i).getBuildLevel();	
       
