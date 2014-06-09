@@ -50,3 +50,5 @@ SettlersOfCatan/src/TownNode.class
 *.class
 
 SettlersOfCatan/src/HumanPlayer.class
+
+SettlersOfCatan/src/Card.class
