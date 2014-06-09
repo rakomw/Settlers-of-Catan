@@ -11,6 +11,7 @@ public class Board {
 								  new RoadNode[8], new RoadNode[4],
 								  new RoadNode[6]};
 	private static TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
+	private static int ref_count = 0;
 
 	public Board() {
 		// put tiles onto the map
@@ -31,7 +32,8 @@ public class Board {
 					score++;
 				}
 			}
-			for (int x = 0; x < 10000; x++) {
+			System.out.println("randomize the roll scores for the tiles");
+			for (int x = 0; x < 1000; x++) {
 				int[] rows = {(int)(Math.random() * 5.0), 
 						   (int)(Math.random() * 5.0)};
 				
@@ -43,9 +45,10 @@ public class Board {
 				tile_scores[rows[1]][cols[1]] = temp;
 			}
 			
+			System.out.println("initial construction of tiles");
 			int tile_count = 0;
 			for (r = 0; r < tiles.length; r++) {
-				for (r = 0; c < tiles[r].length; c++) {
+				for (c = 0; c < tiles[r].length; c++) {
 					if (tile_count < 3) {
 						tiles[r][c] = new Tile(Tile.BRICK, tile_scores[r][c]);
 					}
@@ -71,7 +74,7 @@ public class Board {
 				}
 			}
 			
-			// switch random tiles to randomize the map
+			System.out.println("switch random tiles to randomize the map");
 			for (int x = 0; x < 10000; x++) {
 				int[] rows = {(int)(Math.random() * 5.0), 
 						   (int)(Math.random() * 5.0)};
@@ -88,7 +91,7 @@ public class Board {
 			}
 		}
 		
-		// create & instantiate the temporary construction arrays for the nodes
+		System.out.println("create & instantiate the temporary construction arrays for the nodes");
 		RoadNode[][][] road_road_constructors = new RoadNode[roads.length][][]; // for road constructor
 		for (r = 0; r < roads.length; r++) {
 			road_road_constructors[r] = new RoadNode[roads[r].length][]; // instantiate the varying length of the columns
@@ -97,20 +100,21 @@ public class Board {
 		for (r = 0; r < roads.length; r++) {
 			road_town_constructors[r] = new TownNode[roads[r].length][2];
 		}
-		RoadNode[][][] town_road_constructors = new RoadNode[roads.length][][]; // for town constructor, road parameter
-		for (r = 0; r < town_road_constructors.length; r++) {
-			town_road_constructors[r] = new RoadNode[roads[r].length][];
-		}
-		TownNode[][][] town_town_constructors = new TownNode[towns.length][][]; // for town constructor, town parameter
+		RoadNode[][][] town_road_constructors = new RoadNode[towns.length][][]; // for town constructor, road parameter
 		for (r = 0; r < town_road_constructors.length; r++) {
 			town_road_constructors[r] = new RoadNode[towns[r].length][];
 		}
+		TownNode[][][] town_town_constructors = new TownNode[towns.length][][]; // for town constructor, town parameter
+		for (r = 0; r < town_town_constructors.length; r++) {
+			town_town_constructors[r] = 
+			new TownNode[towns[r].length][];
+		}
 		Tile[][][] town_tile_constructors = new Tile[towns.length][][];
-		for (r = 0; r < town_road_constructors.length; r++) {
+		for (r = 0; r < town_tile_constructors.length; r++) {
 			town_tile_constructors[r] = new Tile[towns[r].length][];
 		}
 		
-		// instantiate the 3rd level arrays to their correct lengths
+		System.out.println("instantiate the 3rd level arrays to their correct lengths");
 		int length;
 		for (r = 0; r < roads.length; r++) { // loop for the road constructors, road parameter
 			for (c = 0; c < roads[r].length; c++) {
@@ -135,7 +139,8 @@ public class Board {
 				else if (c == 0 || c == towns[r].length - 1) { // else because all towns have at least 2 adj roads
 					length--;
 				}
-				town_road_constructors[r][c] = new RoadNode[length];
+				town_road_constructors[r]
+						[c] = new RoadNode[length];
 			}
 		}
 		for (r = 0; r < towns.length; r++) { // loop for the town constructors, town parameter
@@ -151,15 +156,15 @@ public class Board {
 			}
 		}
 		
-		// instantiate all the roads
+		System.out.println("instantiate all the roads");
 		for (r = 0; r < roads.length; r++) {
-			for (c = 0; c < roads[r].length; r++) {
+			for (c = 0; c < roads[r].length; c++) {
 				roads[r][c] = new RoadNode(road_road_constructors[r][c], road_town_constructors[r][c]);
 			}
 		}
-		// instantiate all the towns
+		System.out.println("instantiate all the towns");
 		for (r = 0; r < towns.length; r++) {
-			for (c = 0; c < towns[r].length; r++) {
+			for (c = 0; c < towns[r].length; c++) {
 				// stupid annoying stuff to tell if the town has a trader
 				if ((c == 0 || c == 1) && (r == 0 || r == 5) || (c == 10 && (r == 2 || r == 3))) {
 					towns[r][c] = new TownNode(town_tile_constructors[r][c], town_road_constructors[r][c], town_town_constructors[r][c], 5); // 3:1 trader
@@ -185,25 +190,26 @@ public class Board {
 				}
 			}
 		}
-		// link vertical roads
+		System.out.println("link vertical roads");
 		for (r = 1; r < roads.length; r += 2) {
 			for (c = 1; c < roads[r].length; c++) {
 				linkVerticalRoad(r, c, road_road_constructors, road_town_constructors);
 			}
 		}
 		
-		// link horizontal roads
+		System.out.println("link horizontal roads");
 		for (r = 0; r < roads.length; r += 2) {
 			for (c = 0; c < roads[r].length; c++) {
 				linkHorizontalRoad(r, c, road_road_constructors, road_town_constructors);
 			}
 		}
-		// instantiate the town nodes
+		System.out.println("instantiate the town nodes");
 		for (r = 0; r < towns.length; r++) {
 			for (c = 0; c < roads[r].length; c++) {
 				linkTown(r, c, town_town_constructors, town_tile_constructors[r][c]);
 			}
 		}
+		System.out.println("dependencies: " + ref_count);
 	}
 	
 	// these are road construction helper methods
@@ -248,7 +254,10 @@ public class Board {
 			other_r = r - 1;
 			other_c = c * 2;
 			if (onBoard(roads, other_r, other_c)) {
-				linkReference(road_constructors[r][c], road_constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
+				linkReference(road_constructors[r][c], 
+								road_constructors[other_r][other_c], 
+								roads[r][c], 
+								roads[other_r][other_c]);
 			}
 			other_c++; // other_c = c * 2 + 1;
 			if (onBoard(roads, other_r, other_c)) {
@@ -267,12 +276,15 @@ public class Board {
 			other_r = r / 2;
 			other_c = c;
 			if (onBoard(towns, other_r, other_c)) {
-				linkReference(road_constructors[r][c], road_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 			}
 			other_r++;
 			other_c++;
 			if (onBoard(towns, other_r, other_c)) {
-				linkReference(road_constructors[r][c], road_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				linkReference(town_constructors[r][c], 
+						town_constructors[other_r][other_c], 
+						towns[r][c], 
+						towns[other_r][other_c]);
 			}
 		}
 		else { // below equator
@@ -450,14 +462,18 @@ public class Board {
 	
 	// parameters: the parts of the board to be checked, the location in those parts to be checked
 	private boolean onBoard(final Object[][] parts, final int r, final int c) {
-		return r >= 0 || r < parts.length || c >= 0 || c < parts[r].length;
+		return r >= 0 && r < parts.length && c >= 0 && c < parts[r].length;
 	}
 	
 	private void addReference(Object[] constructors, Object other) {
 		for (int x = 0; x < constructors.length; x++) {
 			// the or allows this function to be always used without worrying about copied references
-			if (constructors[x] == null || constructors[x] == other) {
+			if (constructors[x] == other) {
+				break;
+			}
+			if (constructors[x] == null) {
 				constructors[x] = other;
+				ref_count++;
 				break;
 			}
 		}
