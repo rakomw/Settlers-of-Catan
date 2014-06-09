@@ -358,6 +358,10 @@ public class Board {
 		int[] output = {robber_loc[0], robber_loc[1]};
 		return output;
 	}
+   
+   public Tile[][] getTiles(){
+      return tiles;
+   }
 }
 
 /*

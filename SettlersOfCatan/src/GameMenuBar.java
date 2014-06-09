@@ -3,15 +3,15 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.*;
 
-public class GameGUI extends JPanel{
+public class GameMenuBar extends JMenuBar{
    private  HumanPlayer current_player;
    private  ArrayList<HumanPlayer> players;
    private int turn,num_players,victory_points;
    private  JFrame frame;
    private Deck deck;
-   private Board board;
+   //private Board board;
    
-   public GameGUI(int p){
+   public GameMenuBar(int p){
       frame = GameController.frame;
       deck=new Deck();
       turn=(int)(Math.random()*p);
@@ -32,8 +32,7 @@ public class GameGUI extends JPanel{
       createMenus();
    }
    private void createMenus(){
-      JMenuBar menu_bar = new JMenuBar();
-   	
+   
       JMenu build_menu = new JMenu("Build");
       JMenuItem build_road = new JMenuItem("Build a road");
       JMenuItem build_settlement = new JMenuItem("Build a settlement");
@@ -46,7 +45,8 @@ public class GameGUI extends JPanel{
       build_menu.add(build_road);
       build_menu.add(build_settlement);
       build_menu.add(build_city);
-      menu_bar.add(build_menu);
+      
+      add(build_menu);
    	
    	
       JMenu trade_menu = new JMenu("Trade");
@@ -62,7 +62,7 @@ public class GameGUI extends JPanel{
       trade_menu.add(player_trade);
       trade_menu.add(view_resource);
       
-      menu_bar.add(trade_menu);
+      add(trade_menu);
    	
    	
       JMenu card_menu = new JMenu("Development cards");
@@ -77,14 +77,13 @@ public class GameGUI extends JPanel{
       card_menu.add(view_development);
       card_menu.add(buy_development);
       card_menu.add(play_development);
-      menu_bar.add(card_menu);
+      
+      add(card_menu);
       
       JMenuItem end_turn = new JMenuItem("End turn");
       end_turn.addActionListener(new EndTurnListener());
-      menu_bar.add(end_turn);
       
-   	
-      frame.setJMenuBar(menu_bar);
+      add(end_turn);
    }
 	
    private void nextTurn(){
@@ -134,7 +133,7 @@ public class GameGUI extends JPanel{
    }
    
    public void doRobber(){
-      int[] loc = pickRobberLocation();
+      /*int[] loc = pickRobberLocation();
       board.moveRobber(loc[0],loc[1]);     
       ArrayList<HumanPlayer> list = new ArrayList<HumanPlayer>();
       
@@ -157,7 +156,7 @@ public class GameGUI extends JPanel{
       int[] taking = {stolen};
       int[] giving = {};
       current_player.trade(giving,taking);
-      stealing_from.trade(taking,giving);
+      stealing_from.trade(taking,giving);*/
    }
    private int[] pickRobberLocation(){
       //TODO get tile to put robber on
@@ -489,4 +488,6 @@ public class GameGUI extends JPanel{
          nextTurn();
       }
    }
+
+
 }

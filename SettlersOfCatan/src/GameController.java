@@ -8,6 +8,7 @@ public class GameController {
 	public static JFrame frame;
 	private static StartMenu start_menu;
 	private static GameGUI game_gui;
+   private static JMenuBar menu_bar;
 	
 	public static void main(String[] args) {
 		createStartMenu();
@@ -26,11 +27,14 @@ public class GameController {
    public static void beginGame(int p){
       start_menu.setVisible(false);
       frame.getContentPane().removeAll();
-      game_gui = new GameGUI(p);
+      menu_bar = new GameMenuBar(p);
+      frame.setJMenuBar(menu_bar); 
+      game_gui = new GameGUI();
+      frame.getContentPane().add(game_gui);
    }
    
    public static void endGame(HumanPlayer p){
-      //game_gui.setVisible(false);
+      game_gui.setVisible(false);
       frame.getContentPane().removeAll();
       
       JPanel end = new JPanel();
