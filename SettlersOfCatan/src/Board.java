@@ -241,12 +241,12 @@ public class Board {
 			// road-town links
 			other_r = r / 2;
 			other_c = c * 2;
-			if (onBoard(towns, other_r, other_c)) {
-				linkReference(road_constructors[r][c], road_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+			if (onBoard(roads, other_r, other_c)) {
+				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 			}
 			other_r++;
 			if (onBoard(towns, other_r, other_c)) {
-				linkReference(road_constructors[r][c], road_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 			}
 		}
 		else if (r < 5) { // above equator
@@ -275,12 +275,12 @@ public class Board {
 			// road-town links
 			other_r = r / 2;
 			other_c = c;
-			if (onBoard(towns, other_r, other_c)) {
+			if (onBoard(roads, other_r, other_c)) {
 				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 			}
 			other_r++;
 			other_c++;
-			if (onBoard(towns, other_r, other_c)) {
+			if (onBoard(roads, other_r, other_c)) {
 				linkReference(town_constructors[r][c], 
 						town_constructors[other_r][other_c], 
 						towns[r][c], 
