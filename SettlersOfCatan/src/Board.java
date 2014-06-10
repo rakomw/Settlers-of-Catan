@@ -82,12 +82,10 @@ public class Board {
 				int[] cols = {(int)(Math.random() * (double)tiles[rows[0]].length), 
 						   (int)(Math.random() * (double)tiles[rows[1]].length)};
 				
-				Tile tile1 = tiles[rows[0]][cols[0]], 
-					 tile2 = tiles[rows[1]][cols[1]], 
-					 temp = tile1;
+				Tile temp = tiles[rows[0]][cols[0]];
 				
-				tile1 = tile2;
-				tile2 = temp;
+				tiles[rows[0]][cols[0]] = tiles[rows[1]][cols[1]];
+				tiles[rows[1]][cols[1]] = temp;
 			}
 		}
 		
