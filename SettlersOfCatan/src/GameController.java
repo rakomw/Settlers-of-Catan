@@ -13,7 +13,7 @@ public class GameController {
 	public static void main(String[] args) {
       frame = new JFrame("Settlers of Catan");
 	   frame.setLocation(150,0);
-	   frame.setSize(1000,600);
+	   frame.setSize(600,500);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		createStartMenu();
 	}
@@ -29,12 +29,12 @@ public class GameController {
       frame.getContentPane().removeAll();
       menu_bar = new GameMenuBar(p);
       frame.setJMenuBar(menu_bar); 
-      //game_gui = new GameGUI();
-      //frame.getContentPane().add(game_gui);
+      game_gui = new GameGUI();
+      frame.getContentPane().add(game_gui);
    }
    
    public static void endGame(HumanPlayer p){
-      //game_gui.setVisible(false);
+      game_gui.setVisible(false);
       frame.getContentPane().removeAll();
       frame.setJMenuBar(null);
       
