@@ -164,21 +164,72 @@ public class GameMenuBar extends JMenuBar{
    }
 	
 	
+  public void starting_placements() {
+     int start = turn;
+     if (players.size() == 4) {
+       for (int i=0;i<4;i++) {
+         // vvvvvv placeholder for selection of town @TODO robbie
+         TownNode build_node = null;
+         if (build_node.isBuildable(players.get(start))) {
+           players.get(start%4).build_town(build_node);
+         }
+         // vvvvvv placeholder for selection of road @TODO robbie
+         RoadNode build_node2 = null;
+         if (build_node2.isBuildable(players.get(start))) {
+           players.get(start%4).build_road(build_node2);
+         }
+         start++;
+       }
+       start--;
+       for (int i=0;i<4;i++) {
+         // vvvvvv placeholder for selection of town @TODO robbie
+         TownNode build_node = null;
+         if (build_node.isBuildable(players.get(start))) {
+           players.get(start%4).build_town(build_node);
+         }
+         // vvvvvv placeholder for selection of road @TODO robbie
+         RoadNode build_node2 = null;
+         if (build_node2.isBuildable(players.get(start))) {
+           players.get(start%4).build_road(build_node2);
+         }
+         start--;
+       }
+     }
+   }
+   
    private class RoadListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
       	//TODO Allow clicking of road nodes
+         //called from build a road
+         // decide which node was clicked and name cur_road
+         RoadNode cur_road = null;//placeholder
+         int[] to_remove = {1,0,1,0,0};
+         if (current_player.hasResources(to_remove) && cur_road.isBuildable(current_player)) {
+           current_player.build_road(cur_road);
+         }
       }
    }
    private class SettlementListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
       	//TODO Allow clicking of town nodes
+         TownNode cur_town = null;
+         int[] to_remove = {1,0,1,1,1};
+         if (current_player.hasResources(to_remove) && cur_town.isBuildable(current_player))  {
+           current_player.build_town(cur_town);     
+         }
       }
    }
    private class CityListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
       	//TODO Allow clicking of player's settlements
+         TownNode cur_town = null;
+         int[] to_remove = {0,3,0,0,2};
+         if (current_player.hasResources(to_remove) && cur_town.isBuildable(current_player))  {
+           current_player.build_town(cur_town);      
+         }
       }
    }
+
    private class BankListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
          String harbors_message = "";
