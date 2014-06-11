@@ -1,11 +1,18 @@
-
 public class TownNode extends Node {
-	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns,boolean trader,int trader_stats) {
+	// if the town has a trader
+	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns, int trader_stats) {
 		adj_tiles = in_tiles;
 		adj_roads = in_roads;
 		adj_towns = in_towns;
-		is_trader = trader;
+		is_trader = true;
 		trade_stats = trader_stats;
+	}
+	public TownNode(Tile[] in_tiles, RoadNode[] in_roads, TownNode[] in_towns) {
+		adj_tiles = in_tiles;
+		adj_roads = in_roads;
+		adj_towns = in_towns;
+		is_trader = false;
+		trade_stats = -1;
 	}
 	
 	public static final int NOTHING = 0;
@@ -15,8 +22,8 @@ public class TownNode extends Node {
 	private final Tile[] adj_tiles;
 	private final RoadNode[] adj_roads;
 	private final TownNode[] adj_towns;
-	private boolean is_trader;
-	private int trade_stats;
+	private final boolean is_trader;
+	private final int trade_stats;
 	
 	public boolean buildUp(HumanPlayer in_owner) {
 		if (level < 3) {

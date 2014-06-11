@@ -20,6 +20,11 @@ public class GameGUI extends Canvas implements MouseListener{
    //spacing for tiles: 0 for both is edges touching, 2 and 4 is preferred to make road and town areas clearer
    private final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
    
+   private enum State{
+      DEFAULT, ROAD_BUILDING, SETTLEMENT_BUILDING, CITY_BUILDING, ROBBER
+   }
+   private State state;
+   
    
    public GameGUI(){
       board = new Board();
@@ -51,11 +56,14 @@ public class GameGUI extends Canvas implements MouseListener{
             rolls[r][c] = dice[board.getTileAt(r,c).roll];
          }
       }
+      
+      state = State.DEFAULT;
    }
    
    public void paint(Graphics g){
       //TODO draw water tiles,harbors,roads,towns,and robber
       //draws all of the land hexes and their rolls
+      
       for (int r=0; r < hexes.length; r++){ 
          for (int c=0; c < hexes[r].length; c++){
             int x = (c*(55+HORIZONTAL_GAP))+(200-((2-(Math.abs(r-2)))*(55+HORIZONTAL_GAP)/2));
@@ -65,29 +73,45 @@ public class GameGUI extends Canvas implements MouseListener{
          } 
       }
    }
-   
-   public void mouseEntered(MouseEvent e) {
-       //won't do anything, but required by the interface
-   }
-
-   public void mouseExited(MouseEvent e) {
-       //won't do anything, but required by the interface
-   }
 
    public void mouseClicked(MouseEvent e) {
       //this was for testing purposes
       System.out.println(e.getX()+" "+e.getY());
-
-      /*I'm working on this right now- basic idea is 1: have a switch to determine if we're building roads, 
-      building settlements, upgrading settlements, or moving the robber. 2: map the coordinates of the mouse click
-      to the appropriate node or tile(give ~10px hitbox) 3: call functions from other classes as needed 4: set mode
-      back to inactive */
+      
+      switch(state){
+         case DEFAULT:
+            if(e.isMetaDown()){
+               String info = "";
+               
+            }
+            break;
+            
+         case ROAD_BUILDING:
+            //TODO
+            break;
+            
+         case SETTLEMENT_BUILDING:
+            //TODO
+            break;
+            
+         case CITY_BUILDING:
+            //TODO
+            break;
+         
+         case ROBBER:
+            int[] coordinates = new int[2];
+            //coordinates[0]
+            break;
+      }
    } 
+   
+   //The following are required by the interface, but are not used by this particular class
    public void mouseReleased(MouseEvent e){
-      //won't do anything, but required by the interface
    }
    public void mousePressed(MouseEvent e){
-      //won't do anything, but required by the interface
    }
-    
+   public void mouseEntered(MouseEvent e) {
+   }
+   public void mouseExited(MouseEvent e) {
+   }    
 }

@@ -54,3 +54,7 @@ SettlersOfCatan/src/HumanPlayer.class
 SettlersOfCatan/src/Card.class
 
 SettlersOfCatan/src/Tile.class
+
+*.class
+
+*.class
