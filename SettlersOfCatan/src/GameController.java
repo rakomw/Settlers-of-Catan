@@ -6,9 +6,9 @@ import java.util.*;
 
 public class GameController {
 	public static JFrame frame;
-	private static StartMenu start_menu;
-	private static GameGUI game_gui;
-   private static JMenuBar menu_bar;
+	public static StartMenu start_menu;
+	public static GameGUI game_gui;
+   public static GameMenuBar menu_bar;
 	
 	public static void main(String[] args) {
       frame = new JFrame("Settlers of Catan");
@@ -27,10 +27,15 @@ public class GameController {
    public static void beginGame(int p){
       start_menu.setVisible(false);
       frame.getContentPane().removeAll();
+      
       menu_bar = new GameMenuBar(p);
       frame.setJMenuBar(menu_bar); 
+      
       game_gui = new GameGUI();
       frame.getContentPane().add(game_gui);
+      
+      game_gui.setMenuBar(menu_bar);
+      menu_bar.setGUI(game_gui);
    }
    
    public static void endGame(HumanPlayer p){
@@ -41,8 +46,6 @@ public class GameController {
       JPanel end = new JPanel();
       end.setLayout(new FlowLayout());
  
-      
-      
       JLabel label = new JLabel("Congratulations to " + p + " for winning the game!");
       end.add(label);
             

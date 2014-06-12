@@ -26,26 +26,24 @@ public class TownNode extends Node {
 	private final int trade_stats;
 	
 	public boolean buildUp(HumanPlayer in_owner) {
-		if (level < 3) {
-			level++;
-		}
-		else {
-			return false;
-		}
-		
-		if (owner == null) {
-			owner = in_owner;
-		}
-		else { // a previously built settlement is being replaced with a city of a diff owner
-			return false;
-		}
-		
-		return true;
-	}
+      if(level<2){
+         if(owner.equals(in_owner)){
+            level++;
+            return true;
+         }
+         else if(owner==null){
+            level++;
+            owner=in_owner;
+            return true;
+         }
+         else return false;   
+      }
+      else return false;
+   }
 	
 	// returns true if there is an adjacent road owned by the same player
 	public boolean isBuildable(HumanPlayer prospector) {
-		if (level >= 3) {
+		if (level >= 2) {
 			return false;
 		}
 		for (TownNode t : adj_towns) {

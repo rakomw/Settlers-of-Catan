@@ -1,10 +1,10 @@
-
+import java.awt.*;
 public abstract class Node {
 	protected HumanPlayer owner;
 	protected int level;
 	
 	public abstract boolean isBuildable(HumanPlayer prospector);
-	public abstract boolean buildUp(HumanPlayer prospector) throws Exception;
+	public abstract boolean buildUp(HumanPlayer prospector);
 	
 
 	public int getBuildLevel() {
@@ -14,4 +14,10 @@ public abstract class Node {
 	public HumanPlayer getOwner() {
 		return owner;
 	}
+   
+   public Color getColor(){
+      if(owner==null)
+         return null;
+      return owner.getColor();
+   }
 }

@@ -1,7 +1,6 @@
 public class Board {
 	// all array indexes represent row-major item locations on the map
 	private static Tile[][] tiles = {new Tile[3], new Tile[4], new Tile[5], new Tile[4], new Tile[3]};
-	private static int[] robber_loc = new int[2];
 	private static final int total_tiles = 19;
 	//even rows are diagonal, odd are vertical
 	private static RoadNode[][] roads = {new RoadNode[6], new RoadNode[4], 
@@ -12,7 +11,12 @@ public class Board {
 								  new RoadNode[6]};
 	private static TownNode[][] towns = {new TownNode[7], new TownNode[9], new TownNode[11], new TownNode[11], new TownNode[9], new TownNode[7]};
 	private static int ref_count = 0;
-
+   private static Board the_board;
+   public static Board getInstance(){
+      if(the_board==null)
+         the_board=new Board();
+      return the_board;
+   }
 	public Board() {
 		// put tiles onto the map
 		int r = 0, c = 0;
@@ -90,14 +94,13 @@ public class Board {
 					}
 					else {
 						tiles[r][c] = new Tile(Tile.DESERT, 0);
-						tiles[r][c].has_robber = true;
-						robber_loc[0] = r;
-						robber_loc[1] = c;
+						tiles[r][c].giveRobber(true);
 					}
 					tile_count++;
 				}
 			}
-			
+
+
 			System.out.println("switch random tiles to randomize the map");
 			for (int x = 0; x < 10000; x++) {
 				int[] rows = {(int)(Math.random() * 5.0), 
@@ -110,7 +113,7 @@ public class Board {
 				tiles[rows[0]][cols[0]] = tiles[rows[1]][cols[1]];
 				tiles[rows[1]][cols[1]] = temp;
 			}
-		}
+     }
 		
 		System.out.println("create & instantiate the temporary construction arrays for the nodes");
 		RoadNode[][][] road_road_constructors = new RoadNode[roads.length][][]; // for road constructor
@@ -401,7 +404,7 @@ public class Board {
 				other_r = r - 1;
 				other_c = c - 1;
 				if (onBoard(towns, other_r, other_c)) {
-					linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 				}
 			}
 		}
@@ -523,19 +526,24 @@ public class Board {
 		addReference(others_constructors, first);
 	}
 	
-	public Tile getTileAt(final int row, final int col) {
+	public Tile getTileAt(int row, int col) {
 		return tiles[row][col];
 	}
 	
 	public void moveRobber(final int r, final int c) {
-		tiles[robber_loc[0]][robber_loc[1]].has_robber = false;
-		robber_loc[0] = r;
-		robber_loc[1] = c;
-		tiles[r][c].has_robber = true;
+		for (int k=0; k < tiles.length; k++) 
+         for (int j=0; j < tiles[k].length; j++)
+            tiles[k][j].giveRobber(false);
+
+		tiles[r][c].giveRobber(true);
 	}
+   
+   public RoadNode[][] getRoads(){
+      return roads;
+   }
+   
+   public TownNode[][] getTowns(){
+      return towns;
+   }
 	
-	public int[] getRobberLoc() {
-		int[] output = {robber_loc[0], robber_loc[1]};
-		return output;
-	}
 }

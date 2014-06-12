@@ -28,7 +28,7 @@ public class HumanPlayer {
    public void resourceProduction(int roll) {
       for (TownNode town : towns) {
          for (Tile tile : town.getAdjacentTiles()) {
-            if (tile.roll == roll && !tile.has_robber && tile.resource<=Tile.GRAIN) {
+            if (tile.roll == roll && !tile.hasRobber() && tile.resource<=Tile.GRAIN) {
                if (town.getBuildLevel() == 2) {
                   hand.add(tile.resource);
                }
@@ -139,5 +139,7 @@ public class HumanPlayer {
       name+="Player";
       return name;
    }
-   
+   public Color getColor(){
+      return color;
+   }
 }

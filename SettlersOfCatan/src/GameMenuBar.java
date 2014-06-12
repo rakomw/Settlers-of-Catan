@@ -9,9 +9,14 @@ public class GameMenuBar extends JMenuBar{
    private int turn,num_players,victory_points;
    private  JFrame frame;
    private Deck deck;
-   //private Board board;
+   private GameGUI game_gui;
+   public Board board;
    
+   public void setGUI(GameGUI gui){
+      game_gui=gui;
+   }
    public GameMenuBar(int p){
+      board = Board.getInstance();
       frame = GameController.frame;
       deck=new Deck();
       turn=(int)(Math.random()*p);
@@ -92,8 +97,11 @@ public class GameMenuBar extends JMenuBar{
       else{
          current_player=players.get((turn++)%num_players);
          int roll = (int)(Math.random()*11)+2;
+         JOptionPane.showMessageDialog(frame,current_player + " has rolled " + roll);
          if(roll==7){
-            doRobber();
+            System.out.println("setting state to " + GameGUI.ROBBER_STATE);
+            game_gui.setState(GameGUI.ROBBER_STATE);
+            JOptionPane.showMessageDialog(frame,"Please move the robber");
          }   
          else
             for(HumanPlayer p:players)
@@ -101,7 +109,7 @@ public class GameMenuBar extends JMenuBar{
       }
    }
 
-   public int translate(String s){
+   public static int translate(String s){
       if(s.equals("Lumber"))
          return 0;
       if(s.equals("Ore"))
@@ -115,7 +123,7 @@ public class GameMenuBar extends JMenuBar{
       return -1;
    }
     
-   public String translate(int n){
+   public static String translate(int n){
       switch(n){
          case 0:
             return "Lumber";
@@ -127,40 +135,40 @@ public class GameMenuBar extends JMenuBar{
             return "Wool";
          case 4:
             return "Grain";
-         default: 
-            return "Not a resource";
+         case 5: 
+            return "Desert";
+         case 6:
+            return "Water";
+         default:
+            return "";
       }  
    }
    
-   public void doRobber(){
-      /*int[] loc = pickRobberLocation();
-      board.moveRobber(loc[0],loc[1]);     
+   public void doRobber(int r,int c){
+      game_gui.setState(0);
+      System.out.println("doRobber");
       ArrayList<HumanPlayer> list = new ArrayList<HumanPlayer>();
-      
       for(HumanPlayer p:players)
          for (TownNode town : p.getTowns()) 
             for (Tile tile : town.getAdjacentTiles()) 
-               if (tile.equals(board.getTileAt(loc[0],loc[1]))&& !p.equals(current_player)) 
+               if (tile.equals(board.getTileAt(r,c))&& !p.equals(current_player)) 
                   list.add(p);
-     
+      if(list.isEmpty())
+         return;
       HumanPlayer[] options = (HumanPlayer[])(list.toArray());
       HumanPlayer stealing_from;
-         do{
-            stealing_from = (HumanPlayer)JOptionPane.showInputDialog(frame,
+      do{
+         stealing_from = (HumanPlayer)JOptionPane.showInputDialog(frame,
                "From which player will you steal? ","Stealing a resource",
                JOptionPane.QUESTION_MESSAGE,null,options,options[0]);  
-         }while (stealing_from==null);
+      }while (stealing_from==null);
          
       ArrayList<Integer> cards = stealing_from.getResourceCards();
       int stolen = cards.get((int)(Math.random()*cards.size()));
       int[] taking = {stolen};
       int[] giving = {};
       current_player.trade(giving,taking);
-      stealing_from.trade(taking,giving);*/
-   }
-   private int[] pickRobberLocation(){
-      //TODO get tile to put robber on
-      return new int[2];
+      stealing_from.trade(taking,giving);
    }
 	
 	
@@ -363,8 +371,8 @@ public class GameMenuBar extends JMenuBar{
          if(current_player.hasResources(selling)){
             JOptionPane.showMessageDialog(frame,"Please pass the computer to " + trading_with + ".");
             int will_trade = JOptionPane.showConfirmDialog(frame,"You have been offered " + num_selling + " " + resource_selling +
-             " in exchange for " + num_buying + " " + resource_buying + ".\nWill you make this trade?",
-             "Trade with a player",JOptionPane.YES_NO_OPTION);
+               " in exchange for " + num_buying + " " + resource_buying + ".\nWill you make this trade?",
+               "Trade with a player",JOptionPane.YES_NO_OPTION);
             if(will_trade==JOptionPane.YES_OPTION){
                if(trading_with.hasResources(buying)){
                   current_player.trade(selling,buying);
@@ -400,112 +408,122 @@ public class GameMenuBar extends JMenuBar{
    }
    private class UseDevelopmentListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-       	ArrayList<Card> int_options = current_player.getDevelopmentCards();
-       	ArrayList<String> options = new ArrayList<String>();
-	for (int i=0;i<int_options.size();i++) {
-	 switch (int_options.get(i).get_suit()) {
-           case 0: {
-             options.add("Knight");
-             break;
-           }
-           case 1: {
-             options.add("Free Point");
-             break;
-           }
-           case 2: {
-             options.add("Monopoly");
-             break;
-           }
-           case 3: {
-             options.add("Road Building");
-             break;
-           }
-           case 4: {
-             options.add("Year of Plenty");
-             break;
-           }
+         ArrayList<Card> int_options = current_player.getDevelopmentCards();
+         ArrayList<String> options = new ArrayList<String>();
+         for (int i=0;i<int_options.size();i++) {
+            switch (int_options.get(i).get_suit()) {
+               case 0: 
+                  {
+                     options.add("Knight");
+                     break;
+                  }
+               case 1: 
+                  {
+                     options.add("Free Point");
+                     break;
+                  }
+               case 2: 
+                  {
+                     options.add("Monopoly");
+                     break;
+                  }
+               case 3: 
+                  {
+                     options.add("Road Building");
+                     break;
+                  }
+               case 4: 
+                  {
+                     options.add("Year of Plenty");
+                     break;
+                  }
+            }
          }
-       }
-       Object[] option_arr = options.toArray();
-       String full_input = (String)JOptionPane.showInputDialog(frame, "what card would you like to use?",
-       "development card usage",JOptionPane.QUESTION_MESSAGE,null,option_arr,option_arr[0]);
-       String input = full_input.substring(0,1);
+         Object[] option_arr = options.toArray();
+         String full_input = (String)JOptionPane.showInputDialog(frame, "what card would you like to use?",
+            "development card usage",JOptionPane.QUESTION_MESSAGE,null,option_arr,option_arr[0]);
+         String input = full_input.substring(0,1);
        
-       int use;
-       if (input.equals("K")) {
-         use = 0;
-       }
-       if (input.equals("F")) {
-         use = 1;
-       }
-       if (input.equals("M")) {
-         use = 2;
-       }
-       if (input.equals("R")) {
-         use = 3;
-       }
-       if (input.equals("Y")) {
-         use = 4;
-       }
-       else use = -1;
-       switch (use) {
-         case 0: {
-           current_player.add_knight();
-           doRobber();
-           break;
-         }           
-         case 1: {
-           current_player.free_points_plus();
-           break;
-         }       
-         case 2: {           
-           String[] les_options = {"Lumber","Ore","Brick","Wool","Grain"};
-           String plenty;
-           do{
-               plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
-               "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
-           }while(plenty==null);
-           
-           int resource = translate(plenty);
-           int[] res = {resource};
-           
-           for (int i=0;i<players.size();i++) {
-             if (!players.get(i).equals(current_player)) {
-               while (players.get(i).hasResources(res)) {
-                 players.get(i).trade(res, new int[0]); 
-                 current_player.trade(new int[0], res);
+         int use;
+         if (input.equals("K")) {
+            use = 0;
+         }
+         if (input.equals("F")) {
+            use = 1;
+         }
+         if (input.equals("M")) {
+            use = 2;
+         }
+         if (input.equals("R")) {
+            use = 3;
+         }
+         if (input.equals("Y")) {
+            use = 4;
+         }
+         else use = -1;
+         switch (use) {
+            case 0: 
+               {
+                  current_player.add_knight();
+                  game_gui.setState(GameGUI.ROBBER_STATE);
+                  break;
+               }           
+            case 1: 
+               {
+                  current_player.free_points_plus();
+                  break;
+               }       
+            case 2: 
+               {           
+                  String[] les_options = {"Lumber","Ore","Brick","Wool","Grain"};
+                  String plenty;
+                  do{
+                     plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
+                        "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
+                  }while(plenty==null);
+               
+                  int resource = translate(plenty);
+                  int[] res = {resource};
+               
+                  for (int i=0;i<players.size();i++) {
+                     if (!players.get(i).equals(current_player)) {
+                        while (players.get(i).hasResources(res)) {
+                           players.get(i).trade(res, new int[0]); 
+                           current_player.trade(new int[0], res);
+                        }
+                     }
+                  }           
+                  break;
                }
-             }
-           }           
-           break;
-         }
-         case 3: {
-           RoadNode place1 = null;
-           //player input @ TODO SIR ROBERT
-           current_player.build_road(place1);
-         
-           RoadNode place2 = null;
-           //player input
-           current_player.build_road(place2);
-           break;
-         }           
-         case 4: {                        
-           String[] the_options = {"Lumber","Ore","Brick","Wool","Grain"};
-           int[] trades = new int[2];
-           for(int k=0;k<2;k++){
-               String plenty;
-               do{
-                  plenty =  (String)JOptionPane.showInputDialog(frame, "you used Year of Plenty: choose your resource",
-                     "Year of Plenty",JOptionPane.QUESTION_MESSAGE,null,the_options,the_options[0]);
-               }while(plenty==null);
+            case 3: 
+               {
+                  RoadNode place1 = null;
+               //player input @ TODO SIR ROBERT
+                  current_player.build_road(place1);
                
-               trades[k] = translate(plenty);
-               
-           }
-           current_player.trade(new int[0], trades);
-           break;
-         }
-       } 
+                  RoadNode place2 = null;
+               //player input
+                  current_player.build_road(place2);
+                  break;
+               }           
+            case 4: 
+               {                        
+                  String[] the_options = {"Lumber","Ore","Brick","Wool","Grain"};
+                  int[] trades = new int[2];
+                  for(int k=0;k<2;k++){
+                     String plenty;
+                     do{
+                        plenty =  (String)JOptionPane.showInputDialog(frame, "you used Year of Plenty: choose your resource",
+                           "Year of Plenty",JOptionPane.QUESTION_MESSAGE,null,the_options,the_options[0]);
+                     }while(plenty==null);
+                  
+                     trades[k] = translate(plenty);
+                  
+                  }
+                  current_player.trade(new int[0], trades);
+                  break;
+               }
+         } 
       }
    }
    private class ViewDevCardListener implements ActionListener{
