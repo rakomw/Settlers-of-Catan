@@ -4,7 +4,7 @@ public abstract class Node {
 	protected int level;
 	
 	public abstract boolean isBuildable(HumanPlayer prospector);
-	public abstract boolean buildUp(HumanPlayer prospector);
+	public abstract void buildUp(HumanPlayer prospector);
 	
 
 	public int getBuildLevel() {

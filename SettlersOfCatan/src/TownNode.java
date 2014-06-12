@@ -25,25 +25,16 @@ public class TownNode extends Node {
 	private final boolean is_trader;
 	private final int trade_stats;
 	
-	public boolean buildUp(HumanPlayer in_owner) {
-      if(level<2){
-         if(owner.equals(in_owner)){
-            level++;
-            return true;
-         }
-         else if(owner==null){
-            level++;
-            owner=in_owner;
-            return true;
-         }
-         else return false;   
-      }
-      else return false;
+	public void buildUp(HumanPlayer in_owner) {
+      if(level==0)
+         owner=in_owner;
+      level++;
    }
 	
 	// returns true if there is an adjacent road owned by the same player
 	public boolean isBuildable(HumanPlayer prospector) {
-		if (level >= 2) {
+      
+		if (level >= 2 || (!owner.equals(prospector) && owner!=null)) {
 			return false;
 		}
 		for (TownNode t : adj_towns) {

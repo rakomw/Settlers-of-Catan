@@ -100,8 +100,8 @@ public class GameGUI extends Canvas implements MouseListener{
       
       for (int r=0; r < hexes.length; r++){ 
          for (int c=0; c < hexes[r].length; c++){
-            int x = (c*(55+HORIZONTAL_GAP))+(200-((2-(Math.abs(r-2)))*(55+HORIZONTAL_GAP)/2));
-            int y = (r*(45+VERTICAL_GAP))+50;
+            int x = (c*(55+HORIZONTAL_GAP)) + (200 - ((2 - (Math.abs(r-2)))*(55+HORIZONTAL_GAP)/2));
+            int y = (r*(45+VERTICAL_GAP)) + 50;
             g.drawImage(hexes[r][c],x,y,this);
             
             if(board.getTileAt(r,c).hasRobber()){
@@ -111,57 +111,53 @@ public class GameGUI extends Canvas implements MouseListener{
                g.drawImage(rolls[r][c],x+15,y+20,this);
          } 
       }
-      /*for(int r=0; r < towns.length; r++){
-         for(int c=0;c < towns[r].length; c++){
-            //this will be where settlements/cities are actually drawn, once I get it mathed out
-         }
-      }*/
       g.drawImage(northwestPort,172,3,this);
       g.drawImage(northeastPort,369,51,this);
       g.drawImage(eastPort,426,148,this);
       g.drawImage(southwestPort,173,294,this);
       
-      //settlements are -3 y from this, same coords otherwise
-      //please ignore my wall of testing/tweaking locations, they will be compressed into the for within a half hour
-      g.drawImage(cityRed,195,50,this);
-      g.drawImage(cityRed,222,35,this);
-      g.drawImage(cityRed,249,50,this);
-      g.drawImage(cityRed,276,35,this);
-      g.drawImage(cityRed,303,50,this);
-      g.drawImage(cityRed,330,35,this);
-      g.drawImage(cityRed,357,50,this);
-      
-      
-      g.drawImage(cityRed,168,100,this);
-      g.drawImage(cityRed,195,85,this);
-      g.drawImage(cityRed,222,100,this);
-      g.drawImage(cityRed,249,85,this);
-      g.drawImage(cityRed,276,100,this);
-      g.drawImage(cityRed,303,85,this);
-      g.drawImage(cityRed,330,100,this);
-      g.drawImage(cityRed,357,85,this);
-      g.drawImage(cityRed,384,100,this);
-
-      
-      
-      g.drawImage(cityRed,141,150,this);
-      g.drawImage(cityRed,168,135,this);
-      g.drawImage(cityRed,195,150,this);
-      g.drawImage(cityRed,222,135,this);
-      g.drawImage(cityRed,249,150,this);
-      g.drawImage(cityRed,276,135,this);
-      g.drawImage(cityRed,303,150,this);
-      g.drawImage(cityBlue,330,135,this);
-      g.drawImage(cityRed,357,150,this);
-      g.drawImage(cityRed,384,135,this);
-      g.drawImage(cityRed,411,150,this);
-      
-      
-      g.drawImage(cityRed,141,180,this);
-      g.drawImage(cityOrange,165,195,this);
-      g.drawImage(cityOrange,255,180,this);
-      
-
+      for(int r=0; r < towns.length; r++){
+         for(int c=0;c < towns[r].length; c++){
+            TownNode tempTown = towns[r][c];
+            if(tempTown.get_level()==TownNode.NOTHING)
+               continue;
+            int y,x;
+            x = (c*27)+(195-(27*(int)(2.5-Math.abs(r-2.5))));
+            if(r<3){
+               y = (r*50) + 50 - (15*(c%2));
+            }
+            else if(r==3){
+               y = (r*50)+30+(15*(c%2));
+            }
+            else{
+               y = (r*50)+25+(15*(c%2));
+            }
+            if(tempTown.get_level()==TownNode.TOWN){
+               if(tempTown.getColor().equals(Color.RED))
+                  g.drawImage(settlementRed,x,y,this);
+               else if(tempTown.getColor().equals(Color.GREEN))
+                  g.drawImage(settlementGreen,x,y,this);
+               else if(tempTown.getColor().equals(Color.ORANGE))
+                  g.drawImage(settlementOrange,x,y,this);
+               else if(tempTown.getColor().equals(Color.BLUE))
+                  g.drawImage(settlementBlue,x,y,this);      
+            }
+            else if(tempTown.get_level()==TownNode.CITY){
+               if(tempTown.getColor().equals(Color.RED))
+                  g.drawImage(cityRed,x,y,this);
+               else if(tempTown.getColor().equals(Color.GREEN))
+                  g.drawImage(cityGreen,x,y,this);
+               else if(tempTown.getColor().equals(Color.ORANGE))
+                  g.drawImage(cityOrange,x,y,this);
+               else if(tempTown.getColor().equals(Color.BLUE))
+                  g.drawImage(cityBlue,x,y,this); 
+            }
+            /*For Testing
+            System.out.println("Row: "+r+"\tCol: "+c+"\tX: "+x+"\tY: "+y);
+            g.drawImage(settlementRed,x,y,this);*/
+            
+         }
+      }
       
    }
 

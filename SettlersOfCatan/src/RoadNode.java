@@ -12,14 +12,10 @@ public class RoadNode extends Node {
 	private final RoadNode[] adj_roads; // adjacent towns and roads
 	private final TownNode[] adj_towns;
 	
-	public boolean buildUp(HumanPlayer in_owner) {
-		if (level == 1) {
-			return false;
-		}
-		
+   //only call if isBuildable has verified that it is legal to build, because this doesn't check
+	public void buildUp(HumanPlayer in_owner) {
 		level = 1;
 		owner = in_owner;
-		return true;
 	}
 	
 	public boolean isBuildable(HumanPlayer prospector) {
