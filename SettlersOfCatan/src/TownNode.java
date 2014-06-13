@@ -51,6 +51,17 @@ public class TownNode extends Node {
 		return false;
 	}
 	
+   //returns whether or not the node is a valid location for a player's first town
+   public boolean startBuildable(HumanPlayer prospector){
+      if(owner!=null)//can only build on an empty space
+         return false;
+      for (TownNode t : adj_towns) {
+			if (t.getBuildLevel() > 0) { // there is an adjacent town or city
+				return false;
+			}
+		}
+      return true;
+   }
 	// TownNode specific functions
 	public Tile[] getAdjacentTiles() {
 		return adj_tiles;

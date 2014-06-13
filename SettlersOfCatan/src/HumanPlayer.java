@@ -56,6 +56,12 @@ public class HumanPlayer {
    public void free_points_plus() {
      free_points++;
    }
+   public void set_largest_army(boolean b){
+      largest_army=b;
+   }
+   public void set_longest_road(boolean b){
+      longest_road=b;
+   }
    public int get_num_roads() {
       return roads.size();
    }
@@ -79,9 +85,11 @@ public class HumanPlayer {
      //call menus as players want and get function calls for below
 	//}
    public void build_road(RoadNode rode) {
+      roads.add(rode);
       rode.buildUp(this);
    }
    public void build_town(TownNode toun) {
+      towns.add(toun);
       toun.buildUp(this);  
    }
 	

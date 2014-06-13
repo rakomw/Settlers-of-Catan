@@ -19,7 +19,7 @@ public class GameGUI extends Canvas implements MouseListener{
    private BufferedImage northwestPort, northeastPort, southwestPort, eastPort;
    //specific resource 2:1 harbors
    private BufferedImage woolPort,orePort,lumberPort,grainPort,brickPort;
-   //robber
+   
    private BufferedImage robber;
    
    //2D array of the actual tiles in the board
@@ -27,13 +27,17 @@ public class GameGUI extends Canvas implements MouseListener{
    //2D array to hold the actual roll values of the hexes on the board
    private BufferedImage[][] rolls = {new BufferedImage[3], new BufferedImage[4], new BufferedImage[5],new BufferedImage[4],new BufferedImage[3]};
    
+   //all of the potential town locations on the board
    private TownNode[][] towns;
+   //all of the potential road locations on the board
    private RoadNode[][] roads;
+   //Polygon representations of the hitboxes of all RoadNodes
    private Polygon[][] road_hitboxes;
    private Board board;
    private GameMenuBar menu_bar;
-   //spacing for tiles: 0 for both is edges touching, 2 and 4 is preferred to make road and town areas clearer
-   private final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
+   //spacing for tiles: 0 for both is edges touching, 2 and 4 are preferred to make road and town areas clearer
+   //changing the gaps is not recommended right now because current hitboxes probably won't map correctly with different gaps 
+   private static final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
    public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4, STARTING_TOWN_STATE = 5,STARTING_ROAD_STATE = 6;
    private int state;
 
@@ -47,6 +51,7 @@ public class GameGUI extends Canvas implements MouseListener{
       board = Board.getInstance();
       towns = board.getTowns();
       roads = board.getRoads();
+      constructRoadHitboxes();
       addMouseListener(this);      
       
       tiles = new BufferedImage[7];
@@ -186,7 +191,6 @@ public class GameGUI extends Canvas implements MouseListener{
 
    public void paint(Graphics g){
       setBackground(new Color(59,85,146));
-      //TODO draw water tiles,roads,towns
       
       //draws all of the land hexes and their rolls
       for (int r=0; r < hexes.length; r++){ 
@@ -214,6 +218,7 @@ public class GameGUI extends Canvas implements MouseListener{
       g.drawImage(grainPort,116,197,this);
       g.drawImage(brickPort,371,246,this);
       
+      //draw all roads
       for (int r = 0; r < roads.length; r++) {
          for (int c = 0; c < roads[r].length; c++) {
             if (roads[r][c].getOwner() != null) {
@@ -242,13 +247,13 @@ public class GameGUI extends Canvas implements MouseListener{
             }
             if(tempTown.get_level()==TownNode.TOWN){
                if(tempTown.getColor().equals(Color.RED))
-                  g.drawImage(settlementRed,x,y,this);
+                  g.drawImage(cityRed,x,y,this);
                else if(tempTown.getColor().equals(Color.GREEN))
-                  g.drawImage(settlementGreen,x,y,this);
+                  g.drawImage(cityGreen,x,y,this);
                else if(tempTown.getColor().equals(Color.ORANGE))
-                  g.drawImage(settlementOrange,x,y,this);
+                  g.drawImage(cityOrange,x,y,this);
                else if(tempTown.getColor().equals(Color.BLUE))
-                  g.drawImage(settlementBlue,x,y,this);      
+                  g.drawImage(cityBlue,x,y,this);      
             }
             else if(tempTown.get_level()==TownNode.CITY){
                if(tempTown.getColor().equals(Color.RED))
@@ -262,7 +267,7 @@ public class GameGUI extends Canvas implements MouseListener{
             }
             //Testing purposes
             //System.out.println("Row: "+r+"\tCol: "+c+"\tX: "+x+"\tY: "+y);
-            //g.drawImage(cityRed,x,y,this);
+            //g.drawImage(cityBlue,x,y,this);
             
          }
       }
@@ -277,9 +282,6 @@ public class GameGUI extends Canvas implements MouseListener{
       System.out.println("State:"+state);
       switch(state){
          case DEFAULT_STATE:
-            coords = mapToTown(x,y);
-            System.out.println(coords[0]+" "+coords[1]);
-
             if(e.isMetaDown()){
                coords = mapToTile(x,y);
                if(coords[0]>=0 && coords[1]>=0)
@@ -295,7 +297,7 @@ public class GameGUI extends Canvas implements MouseListener{
                   if (road_hitboxes[r][c].contains(x, y)) {
                      System.out.println("Road clicked");
                      menu_bar.buildRoad(roads[r][c]);
-                     paint(getGraphics());
+                     update(getGraphics());
                   }
                }
             }
@@ -334,21 +336,43 @@ public class GameGUI extends Canvas implements MouseListener{
             break;
          
          case ROBBER_STATE:
-            System.out.println("Entered robber case");
-            System.out.println("Coords are " + x + " " + y);
             coords = mapToTile(x,y);
             
             if(coords[0]>=0 && coords[1]>=0){
-               System.out.println("coords made");
                board.moveRobber(coords[0],coords[1]);
-               System.out.println("board move done");
                menu_bar.doRobber(coords[0],coords[1]);
-               System.out.println("doneRobber");
-            }
-            else
-               System.out.println("Invalid click");
-               
+            }  
             update(getGraphics());
+            break;
+          
+          case STARTING_TOWN_STATE:
+            System.out.println("Entered starting town case");
+            coords = mapToTown(x,y);
+            
+            if(coords[0]<0 || coords[1]<0){
+               System.out.println("No town node clicked");
+               return;
+            }
+               
+            if(towns[coords[0]][coords[1]].get_level()>0){
+               System.out.println("Trying to build a town on another town");
+               return;
+            }
+            
+            menu_bar.buildStartTown(towns[coords[0]][coords[1]]);
+            update(getGraphics());
+            break;  
+            
+          case STARTING_ROAD_STATE:
+            System.out.println("Entered starting road case");
+            for (int r = 0; r < roads.length; r++) {
+               for (int c = 0; c < roads[r].length; c++) {
+                  if (road_hitboxes[r][c].contains(x, y)) {
+                     menu_bar.buildStartRoad(roads[r][c]);
+                     update(getGraphics());
+                  }
+               }
+            }
             break;
       }
    } 

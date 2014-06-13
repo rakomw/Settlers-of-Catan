@@ -92,6 +92,8 @@ public class GameMenuBar extends JMenuBar{
    }
 	
    private void nextTurn(){
+      giveLongestRoad();
+      giveLargestArmy();
       if(current_player.get_points()>=victory_points)
          GameController.endGame(current_player);
       else{
@@ -109,8 +111,25 @@ public class GameMenuBar extends JMenuBar{
                p.resourceProduction(roll);
       }
    }
-
-   private void discard(){
+   
+   private void giveLongestRoad(){
+      for(HumanPlayer p:players)
+         p.set_longest_road(false);
+      //calculate who has the longest continuous road. if no tie and the highest
+      //is at least 5 long, do set_longest_road(true) on that player
+   }
+   private void giveLargestArmy(){
+      for(HumanPlayer p:players)
+         p.set_largest_army(false);
+      int max=0;
+      for(int k=1;k<players.size();k++)
+         if(players.get(k).get_num_knights()>players.get(max).get_num_knights())
+            max=k;
+            
+      if(players.get(max).get_num_knights()>=3)
+         players.get(max).set_largest_army(true);   
+   }
+   public void discard(){
       for(HumanPlayer p:players){
          if(p.getResourceCards().size()>7){
             JOptionPane.showMessageDialog(frame,"Please pass the computer to "+p);
@@ -188,7 +207,7 @@ public class GameMenuBar extends JMenuBar{
    }
    
    public void doRobber(int r,int c){
-      game_gui.setState(0);
+      game_gui.setState(game_gui.DEFAULT_STATE);
       System.out.println("doRobber");
       ArrayList<HumanPlayer> list = new ArrayList<HumanPlayer>();
       for(HumanPlayer p:players)
@@ -240,58 +259,59 @@ public class GameMenuBar extends JMenuBar{
     }
     
    
-   public void starting_placements() {  
-      startingTowns(turn);
+   public void startingTowns(){ 
+   if(turn<0){
+      turn=0;
+      return;
    }
-   public void startingTowns(int turn){
       current_player = players.get(turn%players.size());
+      if(current_player.getTowns().size()>0){
+         townsTwo();
+         return;
+      }
       game_gui.setState(GameGUI.STARTING_TOWN_STATE);
+      JOptionPane.showMessageDialog(frame,current_player+", please build your first town");
    }   
       
-      
-      
-      
-      /*
-      
-               if (players.size() == 4) {
-            for (int i=0;i<4;i++) {
-         // vvvvvv placeholder for selection of town @TODO robbie
-            TownNode build_node = null;
-            if (build_node.isBuildable(players.get(start))) {
-               players.get(start%4).build_town(build_node);
-            }
-         // vvvvvv placeholder for selection of road @TODO robbie
-            RoadNode build_node2 = null;
-            if (build_node2.isBuildable(players.get(start))) {
-               players.get(start%4).build_road(build_node2);
-            }
-            start++;
-         }
-         start--;
-         for (int i=0;i<4;i++) {
-         // vvvvvv placeholder for selection of town @TODO robbie
-            TownNode build_node = null;
-            if (build_node.isBuildable(players.get(start))) {
-               players.get(start%4).build_town(build_node);
-            }
-         // vvvvvv placeholder for selection of road @TODO robbie
-            RoadNode build_node2 = null;
-            if (build_node2.isBuildable(players.get(start))) {
-               players.get(start%4).build_road(build_node2);
-            }
-            start--;
-         }
-      }*/
+   public void buildStartTown(TownNode town){
+      if(town.startBuildable(current_player)){
+         current_player.build_town(town);
+         game_gui.update(game_gui.getGraphics());
+         game_gui.setState(GameGUI.STARTING_ROAD_STATE);
+         JOptionPane.showMessageDialog(frame,current_player + ", please build a road");
+      }   
+   }   
+  
+   public void buildStartRoad(RoadNode road){
+      if(road.startBuildable(current_player)){
+         current_player.build_road(road);
+         game_gui.update(game_gui.getGraphics());
+         if(current_player.getTowns().size()>1)
+            turn--;
+         else
+            turn++;
+         startingTowns();
+      }     
+   }
    
+   public void townsTwo(){ 
+      turn--;
+      if(turn<0){
+         turn=0;
+         return;
+      }
+      current_player = players.get(turn%players.size());
+      if(current_player.getTowns().size()>1)
+         return;
+      JOptionPane.showMessageDialog(frame,current_player+", please build your second town");
+      game_gui.setState(GameGUI.STARTING_TOWN_STATE);
+   }
+      
    private class RoadListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-      	//TODO Allow clicking of road nodes
-         //called from build a road
-         // decide which node was clicked and name cur_road
-         RoadNode cur_road = null;//placeholder
          int[] to_remove = {1,0,1,0,0};
-         if (current_player.hasResources(to_remove) && cur_road.isBuildable(current_player)) {
-           current_player.build_road(cur_road);
+         if (current_player.hasResources(to_remove)) {
+           game_gui.setState(GameGUI.ROAD_STATE);
          }
       }
    }
