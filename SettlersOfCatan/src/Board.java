@@ -374,7 +374,7 @@ public class Board {
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 		}
-		other_c = c + 1;
+		other_c = c - 1;
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 		}

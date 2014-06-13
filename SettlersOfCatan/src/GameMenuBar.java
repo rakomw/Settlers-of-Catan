@@ -231,8 +231,26 @@ public class GameMenuBar extends JMenuBar{
          JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
    }
   
-	
+	public void buildRoad(RoadNode road) {
+       current_player.build_road(road);
+       int[] to_remove = {1,0,1,0,0};
+       if (!current_player.trade(to_remove, new int[0])) {
+          System.out.println("Player hand not tested correctly");
+       }
+    }
+    
+   
    public void starting_placements() {  
+      startingTowns(turn);
+   }
+   public void startingTowns(int turn){
+      current_player = players.get(turn%players.size());
+      game_gui.setState(GameGUI.STARTING_TOWN_STATE);
+   }   
+      
+      
+      
+      
       /*
       
                if (players.size() == 4) {
@@ -264,7 +282,6 @@ public class GameMenuBar extends JMenuBar{
             start--;
          }
       }*/
-   }
    
    private class RoadListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
@@ -616,6 +633,4 @@ public class GameMenuBar extends JMenuBar{
          nextTurn();
       }
    }
-
-
 }

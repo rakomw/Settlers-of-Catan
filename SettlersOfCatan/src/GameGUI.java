@@ -29,12 +29,14 @@ public class GameGUI extends Canvas implements MouseListener{
    
    private TownNode[][] towns;
    private RoadNode[][] roads;
+   private Polygon[][] road_hitboxes;
    private Board board;
    private GameMenuBar menu_bar;
    //spacing for tiles: 0 for both is edges touching, 2 and 4 is preferred to make road and town areas clearer
    private final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
-   public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4;
+   public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4, STARTING_TOWN_STATE = 5,STARTING_ROAD_STATE = 6;
    private int state;
+
    
    
    public void setMenuBar(GameMenuBar bar){
@@ -100,7 +102,88 @@ public class GameGUI extends Canvas implements MouseListener{
       
       state = DEFAULT_STATE;
    }
-   
+   private void constructRoadHitboxes() {
+      road_hitboxes = new Polygon[roads.length][];
+      for (int r = 0; r < road_hitboxes.length; r++) {
+         road_hitboxes[r] = new Polygon[roads[r].length];
+      }
+      
+      // create the road polygons
+      for (int r = 0; r < roads.length; r++) {
+         for (int c = 0; c < roads[r].length; c++) {
+            // variable decs.
+            final int starting_y = 66, // the y value of the top-left-most pixel of the roads
+                     vert_height = 30, // the height of vertical roads
+                     diag_height = 17, // the height of diagonal roads
+                     diag_width = 27, // the width of diagonal roads
+                     road_thickness = 3; // half the entire width of the road
+                     // the left-most pixel of each row of roads
+            int[] left_bounds = {200, 200, 172, 172, 143, 143, 143, 172, 172, 200, 200};
+            // find the end points of the road
+            
+            // in vertical roads, the top point corresponds to index 0
+            int[] end_x = new int[2]; 
+            int[] end_y = new int[2];
+            
+            if (r % 2 == 0) { // if diagonal road
+               end_x[0] = left_bounds[r] + (diag_width + 1) * c ;
+               end_x[1] = end_x[0] + diag_width;
+               if (c % 2 == 0) { // if upward road
+                  if (r < 5) { // if north
+                     end_y[0] = starting_y + ((diag_height + vert_height + 2) * (r / 2));
+                     end_y[1] = end_y[0] - diag_height;
+                  }
+                  else { // if south
+                     end_y[0] = starting_y - diag_height + ((diag_height + vert_height + 2) * (r / 2));
+                     end_y[1] = end_y[0] + diag_height;
+                  }
+               }
+               else { // if downward road
+                  if (r < 5) { // if north
+                     end_y[0] = starting_y - diag_height + ((diag_height + vert_height + 2) * (r / 2));
+                     end_y[1] = end_y[0] + diag_height;
+                  }
+                  else { // if south
+                     end_y[0] = starting_y + ((diag_height + vert_height + 2) * (r / 2));
+                     end_y[1] = end_y[0] - diag_height;
+                  }
+               }
+            }
+            else { // if vertical road
+               end_x[0] = left_bounds[r] + ((diag_width * 2 + 2) * c);
+               end_x[1] = end_x[0];
+               end_y[0] = starting_y + ((diag_height + vert_height + 2) * (r / 2));
+               end_y[1] = end_y[0] + vert_height;
+            }
+            
+            // find the corners of the polygon
+            double factor;
+            int[] slope = new int[2]; // index 0 is numerator, 1 denominator
+            // get road slope
+            slope[0] = end_y[1] - end_y[0];
+            slope[1] = end_x[1] - end_x[0];
+            // perpendicularize the slope
+            int[] perp_slope = {-1 * slope[1], slope[0]};
+            factor=(double)road_thickness/Math.sqrt((double)(perp_slope[0]*perp_slope[0])+
+                                                    (double)(perp_slope[1]*perp_slope[1]));
+            
+            int[] corner_xs = new int[4];
+            int[] corner_ys = new int[4];
+            corner_xs[0] = (int)((double)end_x[0] - (double)perp_slope[1] * factor);
+            corner_ys[0] = (int)((double)end_y[0] - (double)perp_slope[0] * factor);
+            corner_xs[1] = (int)((double)end_x[0] + (double)perp_slope[1] * factor);
+            corner_ys[1] = (int)((double)end_y[0] + (double)perp_slope[0] * factor);
+            corner_xs[2] = (int)((double)end_x[1] + (double)perp_slope[1] * factor);
+            corner_ys[2] = (int)((double)end_y[1] + (double)perp_slope[0] * factor);
+            corner_xs[3] = (int)((double)end_x[1] - (double)perp_slope[1] * factor);
+            corner_ys[3] = (int)((double)end_y[1] - (double)perp_slope[0] * factor);
+            
+            // produce final product
+            road_hitboxes[r][c] = new Polygon(corner_xs, corner_ys, 4);
+         }
+      }
+   }
+
    public void paint(Graphics g){
       setBackground(new Color(59,85,146));
       //TODO draw water tiles,roads,towns
@@ -130,6 +213,15 @@ public class GameGUI extends Canvas implements MouseListener{
       g.drawImage(lumberPort,285,295,this);
       g.drawImage(grainPort,116,197,this);
       g.drawImage(brickPort,371,246,this);
+      
+      for (int r = 0; r < roads.length; r++) {
+         for (int c = 0; c < roads[r].length; c++) {
+            if (roads[r][c].getOwner() != null) {
+               g.setColor(roads[r][c].getOwner().getColor());
+               g.fillPolygon(road_hitboxes[r][c]);
+            }
+         }
+      }
       
       //draw settlements/cities
       for(int r=0; r < towns.length; r++){
@@ -196,7 +288,17 @@ public class GameGUI extends Canvas implements MouseListener{
             break;
             
          case ROAD_STATE:
-            //TODO
+            System.out.println("Entered road case");
+            System.out.println("Coords are " + x + " " + y);
+            for (int r = 0; r < roads.length; r++) {
+               for (int c = 0; c < roads[r].length; c++) {
+                  if (road_hitboxes[r][c].contains(x, y)) {
+                     System.out.println("Road clicked");
+                     menu_bar.buildRoad(roads[r][c]);
+                     paint(getGraphics());
+                  }
+               }
+            }
             break;
             
          case TOWN_STATE:
