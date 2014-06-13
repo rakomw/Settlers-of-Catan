@@ -87,8 +87,11 @@ public class GameMenuBar extends JMenuBar{
       
       JMenuItem end_turn = new JMenuItem("End turn");
       end_turn.addActionListener(new EndTurnListener());
+      JMenuItem refresh = new JMenuItem("Refresh screen");
+      refresh.addActionListener(new RefreshListener());
       
       add(end_turn);
+      add(refresh);
    }
 	
    private void nextTurn(){
@@ -97,6 +100,8 @@ public class GameMenuBar extends JMenuBar{
       if(current_player.get_points()>=victory_points)
          GameController.endGame(current_player);
       else{
+         if(turn<0)
+            turn=Math.abs(turn%players.size());
          current_player=players.get((turn++)%num_players);
          int roll = (int)(Math.random()*11)+2;
          JOptionPane.showMessageDialog(frame,current_player + " has rolled " + roll);
@@ -213,11 +218,11 @@ public class GameMenuBar extends JMenuBar{
       for(HumanPlayer p:players)
          for (TownNode town : p.getTowns()) 
             for (Tile tile : town.getAdjacentTiles()) 
-               if (tile.equals(board.getTileAt(r,c))&& !p.equals(current_player)) 
+               if (tile!=null&&tile.equals(board.getTileAt(r,c))&& !p.equals(current_player)) 
                   list.add(p);
       if(list.isEmpty())
          return;
-      HumanPlayer[] options = (HumanPlayer[])(list.toArray());
+      Object[] options = list.toArray();
       HumanPlayer stealing_from;
       do{
          stealing_from = (HumanPlayer)JOptionPane.showInputDialog(frame,
@@ -226,6 +231,8 @@ public class GameMenuBar extends JMenuBar{
       }while (stealing_from==null);
          
       ArrayList<Integer> cards = stealing_from.getResourceCards();
+      if(cards.isEmpty())
+         return;
       int stolen = cards.get((int)(Math.random()*cards.size()));
       int[] taking = {stolen};
       int[] giving = {};
@@ -235,35 +242,29 @@ public class GameMenuBar extends JMenuBar{
 	
    public void buildTown(TownNode town){
       if(town.isBuildable(current_player)){
-         if(town.get_level()==0){
-            int[] paid={1,0,1,1,1};
-            current_player.trade(paid,null);
-         }
-         else{
-            int[] paid={0,3,0,0,2};
-            current_player.trade(paid,null);
-         }
          town.buildUp(current_player);
          game_gui.setState(GameGUI.DEFAULT_STATE);
+         game_gui.update(game_gui.getGraphics());
       }
       else
          JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
    }
   
-	public void buildRoad(RoadNode road) {
-       current_player.build_road(road);
-       int[] to_remove = {1,0,1,0,0};
-       if (!current_player.trade(to_remove, new int[0])) {
-          System.out.println("Player hand not tested correctly");
-       }
-    }
+   public void buildRoad(RoadNode road) {
+      if(road.isBuildable(current_player)){
+         current_player.build_road(road);
+         game_gui.setState(GameGUI.DEFAULT_STATE);
+         game_gui.update(game_gui.getGraphics());
+      }
+      else
+         JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
+   
+   }
     
    
    public void startingTowns(){ 
-   if(turn<0){
-      turn=0;
-      return;
-   }
+      if(turn<0)
+         turn=Math.abs(turn%players.size());
       current_player = players.get(turn%players.size());
       if(current_player.getTowns().size()>0){
          townsTwo();
@@ -285,6 +286,7 @@ public class GameMenuBar extends JMenuBar{
    public void buildStartRoad(RoadNode road){
       if(road.startBuildable(current_player)){
          current_player.build_road(road);
+         game_gui.setState(GameGUI.DEFAULT_STATE);
          game_gui.update(game_gui.getGraphics());
          if(current_player.getTowns().size()>1)
             turn--;
@@ -296,8 +298,15 @@ public class GameMenuBar extends JMenuBar{
    
    public void townsTwo(){ 
       turn--;
-      if(turn<0){
-         turn=0;
+      if(turn<0)
+         turn=Math.abs(turn%players.size());
+      boolean done=true;
+      for(HumanPlayer p:players)
+         if(p.getTowns().size()<2)
+            done=false;
+      if(done){
+         game_gui.setState(GameGUI.DEFAULT_STATE);
+         nextTurn();
          return;
       }
       current_player = players.get(turn%players.size());
@@ -311,7 +320,7 @@ public class GameMenuBar extends JMenuBar{
       public void actionPerformed(ActionEvent e){
          int[] to_remove = {1,0,1,0,0};
          if (current_player.hasResources(to_remove)) {
-           game_gui.setState(GameGUI.ROAD_STATE);
+            game_gui.setState(GameGUI.ROAD_STATE);
          }
       }
    }
@@ -651,6 +660,12 @@ public class GameMenuBar extends JMenuBar{
    private class EndTurnListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
          nextTurn();
+      }
+   }
+   private class RefreshListener implements ActionListener{
+      public void actionPerformed(ActionEvent e){
+         //force an update if canvas image is behind for some reason
+         game_gui.update(game_gui.getGraphics());
       }
    }
 }

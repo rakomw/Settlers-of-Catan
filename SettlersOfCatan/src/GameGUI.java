@@ -247,13 +247,13 @@ public class GameGUI extends Canvas implements MouseListener{
             }
             if(tempTown.get_level()==TownNode.TOWN){
                if(tempTown.getColor().equals(Color.RED))
-                  g.drawImage(cityRed,x,y,this);
+                  g.drawImage(settlementRed,x,y,this);
                else if(tempTown.getColor().equals(Color.GREEN))
-                  g.drawImage(cityGreen,x,y,this);
+                  g.drawImage(settlementGreen,x,y,this);
                else if(tempTown.getColor().equals(Color.ORANGE))
-                  g.drawImage(cityOrange,x,y,this);
+                  g.drawImage(settlementOrange,x,y,this);
                else if(tempTown.getColor().equals(Color.BLUE))
-                  g.drawImage(cityBlue,x,y,this);      
+                  g.drawImage(settlementBlue,x,y,this);      
             }
             else if(tempTown.get_level()==TownNode.CITY){
                if(tempTown.getColor().equals(Color.RED))
