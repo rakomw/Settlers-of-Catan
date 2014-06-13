@@ -353,12 +353,6 @@ public class GameGUI extends Canvas implements MouseListener{
                System.out.println("No town node clicked");
                return;
             }
-               
-            if(towns[coords[0]][coords[1]].get_level()>0){
-               System.out.println("Trying to build a town on another town");
-               return;
-            }
-            
             menu_bar.buildStartTown(towns[coords[0]][coords[1]]);
             update(getGraphics());
             break;  

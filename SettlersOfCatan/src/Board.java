@@ -65,8 +65,8 @@ public class Board {
 				int[] rows = {(int)(Math.random() * 5.0), 
 						   (int)(Math.random() * 5.0)};
 				
-				int[] cols = {(int)(Math.random() * tile_scores[rows[0]].length), 
-						   (int)(Math.random() * tile_scores[rows[1]].length)};
+				int[] cols = {(int)(Math.random() * (double)tile_scores[rows[0]].length), 
+						        (int)(Math.random() * (double)tile_scores[rows[1]].length)};
 				
 				int temp = tile_scores[rows[0]][cols[0]];
 				tile_scores[rows[0]][cols[0]] = tile_scores[rows[1]][cols[1]];
@@ -113,6 +113,12 @@ public class Board {
 				tiles[rows[0]][cols[0]] = tiles[rows[1]][cols[1]];
 				tiles[rows[1]][cols[1]] = temp;
 			}
+         
+         /*for (r = 0; r < tiles.length; r++) {
+            for (c = 0; c < tiles[r].length; c++) {
+               System.out.println(tiles[r][c]);
+            }
+         }*/
      }
 		
 		System.out.println("create & instantiate the temporary construction arrays for the nodes");
@@ -180,7 +186,7 @@ public class Board {
 		}
 		for (r = 0; r < towns.length; r++) { // loop for town constructors, tile parameter
 			for (c = 0; c < towns[r].length; c++) {
-				if (c == 0 || c % 2 == 1 && (r == 0 || r == towns.length - 1)) {
+				if ((r == 0 || r == towns.length - 1) && c % 2 != 0 || c == 0 || c == towns[r].length - 1) {
 					length = 1;
 				}
 				else if (c == 1 || c == towns[r].length - 2 || (r == 0 || r == towns.length - 1) && c % 2 == 0) {
@@ -247,6 +253,28 @@ public class Board {
 				linkTown(r, c, town_town_constructors, town_tile_constructors[r][c]);
 			}
 		}
+      
+      // reality check on town-tile references
+      /*boolean good;
+      for (r = 0; r < towns.length; r++) {
+         for (c = 0; c < towns[r].length; c++) {
+            for (Tile t : towns[r][c].getAdjacentTiles()) {
+               good = false;
+               if (t == null) {
+                  System.out.println("null problem: town " + r + ", " + c + " references length: " + towns[r][c].getAdjacentTiles().length);
+               }
+               for (int r2 = 0; r2 < tiles.length; r2++) {
+                  for (int c2 = 0; c2 < tiles[r2].length; c2++) {
+                     if (t.resource == tiles[r2][c2].resource && t.roll == tiles[r2][c2].roll) {
+                        good = true;
+                     }
+                  }
+               }
+               System.out.println("problem: town " + r + ", " + c);
+            }
+            
+         }
+      }*/
 		System.out.println("dependencies: " + ref_count);
 	}
 	
@@ -310,7 +338,7 @@ public class Board {
 			
 			// road-town links
 			other_r = r / 2;
-			other_c = c;
+			other_c = c * 2;
 			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 			}
@@ -343,7 +371,7 @@ public class Board {
 			
 			// road-town links
 			other_r = r / 2;
-			other_c = c + 1;
+			other_c = c * 2+ 1;
 			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 			}
@@ -374,7 +402,7 @@ public class Board {
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 		}
-		other_c = c - 1;
+		other_c = c + 1;
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 		}

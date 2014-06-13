@@ -19,7 +19,7 @@ public class GameMenuBar extends JMenuBar{
       board = Board.getInstance();
       frame = GameController.frame;
       deck=new Deck();
-      turn=(int)(Math.random()*p);
+      turn=(int)(Math.random()*p)+20;//padding
       players = new ArrayList<HumanPlayer>();
       num_players = p;
       if(num_players==3)
@@ -33,7 +33,7 @@ public class GameMenuBar extends JMenuBar{
       players.add(new HumanPlayer(Color.BLUE));
       players.add(new HumanPlayer(Color.GREEN));
      
-      current_player=players.get(turn);
+      current_player=players.get(turn%players.size());
       createMenus();
    }
    private void createMenus(){
@@ -100,8 +100,6 @@ public class GameMenuBar extends JMenuBar{
       if(current_player.get_points()>=victory_points)
          GameController.endGame(current_player);
       else{
-         if(turn<0)
-            turn=Math.abs(turn%players.size());
          current_player=players.get((turn++)%num_players);
          int roll = (int)(Math.random()*11)+2;
          JOptionPane.showMessageDialog(frame,current_player + " has rolled " + roll);
@@ -261,25 +259,34 @@ public class GameMenuBar extends JMenuBar{
    
    }
     
-   
-   public void startingTowns(){ 
-      if(turn<0)
-         turn=Math.abs(turn%players.size());
-      current_player = players.get(turn%players.size());
-      if(current_player.getTowns().size()>0){
-         townsTwo();
+   private int initStep=0;
+   public void initBuild(){
+      if(initStep==players.size()*2){
+         turn++;
+         nextTurn();
          return;
       }
+         
+      current_player = players.get(turn%players.size());
+      JOptionPane.showMessageDialog(frame,"Please build a town "+current_player);
       game_gui.setState(GameGUI.STARTING_TOWN_STATE);
-      JOptionPane.showMessageDialog(frame,current_player+", please build your first town");
-   }   
-      
+   }
    public void buildStartTown(TownNode town){
       if(town.startBuildable(current_player)){
          current_player.build_town(town);
          game_gui.update(game_gui.getGraphics());
          game_gui.setState(GameGUI.STARTING_ROAD_STATE);
-         JOptionPane.showMessageDialog(frame,current_player + ", please build a road");
+         
+         if(initStep>=players.size()){
+            int[] temp = new int[1];
+            for(Tile t:town.getAdjacentTiles()){
+               temp[0]=t.resource;
+               if(temp[0]<=Tile.GRAIN)
+                current_player.trade(temp,null);
+            }     
+         }
+         
+         JOptionPane.showMessageDialog(frame,"Please build a road "+current_player);
       }   
    }   
   
@@ -288,34 +295,16 @@ public class GameMenuBar extends JMenuBar{
          current_player.build_road(road);
          game_gui.setState(GameGUI.DEFAULT_STATE);
          game_gui.update(game_gui.getGraphics());
-         if(current_player.getTowns().size()>1)
-            turn--;
-         else
+         initStep++;
+         if(initStep<players.size())
             turn++;
-         startingTowns();
+         else if(initStep>players.size())
+            turn--;
+         initBuild();
       }     
    }
    
-   public void townsTwo(){ 
-      turn--;
-      if(turn<0)
-         turn=Math.abs(turn%players.size());
-      boolean done=true;
-      for(HumanPlayer p:players)
-         if(p.getTowns().size()<2)
-            done=false;
-      if(done){
-         game_gui.setState(GameGUI.DEFAULT_STATE);
-         nextTurn();
-         return;
-      }
-      current_player = players.get(turn%players.size());
-      if(current_player.getTowns().size()>1)
-         return;
-      JOptionPane.showMessageDialog(frame,current_player+", please build your second town");
-      game_gui.setState(GameGUI.STARTING_TOWN_STATE);
-   }
-      
+        
    private class RoadListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
          int[] to_remove = {1,0,1,0,0};
