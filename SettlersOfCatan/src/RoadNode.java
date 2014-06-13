@@ -3,12 +3,13 @@ public class RoadNode extends Node {
 	public RoadNode(RoadNode[] in_roads, TownNode[] in_towns) {
 		adj_roads = in_roads;
 		adj_towns = in_towns;
+      level=0;
 	}
 	
 	public static final int NOTHING = 0;
 	public static final int ROAD = 1;
 	
-	private int level = 0; // 0 for no road, 1 for road
+	private int level; // 0 for no road, 1 for road
 	private final RoadNode[] adj_roads; // adjacent towns and roads
 	private final TownNode[] adj_towns;
 	

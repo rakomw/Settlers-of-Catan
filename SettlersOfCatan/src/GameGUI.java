@@ -17,6 +17,8 @@ public class GameGUI extends Canvas implements MouseListener{
    private BufferedImage cityBlue,cityRed,cityOrange,cityGreen;
    //generic 3:1 harbors
    private BufferedImage northwestPort, northeastPort, southwestPort, eastPort;
+   //specific resource 2:1 harbors
+   private BufferedImage woolPort,orePort,lumberPort,grainPort,brickPort;
    //robber
    private BufferedImage robber;
    
@@ -31,7 +33,7 @@ public class GameGUI extends Canvas implements MouseListener{
    private GameMenuBar menu_bar;
    //spacing for tiles: 0 for both is edges touching, 2 and 4 is preferred to make road and town areas clearer
    private final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
-   public static int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4;
+   public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4;
    private int state;
    
    
@@ -62,6 +64,11 @@ public class GameGUI extends Canvas implements MouseListener{
          southwestPort = ImageIO.read(new File("resources/southwestPort.gif"));
          eastPort = ImageIO.read(new File("resources/eastPort.gif"));
          
+         woolPort = ImageIO.read(new File("resources/portSheep.gif"));
+         orePort = ImageIO.read(new File("resources/portOre.gif"));
+         lumberPort = ImageIO.read(new File("resources/portLumber.gif"));
+         grainPort = ImageIO.read(new File("resources/portGrain.gif"));
+         brickPort = ImageIO.read(new File("resources/portBrick.gif"));
         
          settlementBlue = ImageIO.read(new File("resources/settlementBlue.gif"));
          settlementRed = ImageIO.read(new File("resources/settlementRed.gif"));
@@ -95,9 +102,10 @@ public class GameGUI extends Canvas implements MouseListener{
    }
    
    public void paint(Graphics g){
-      //TODO draw water tiles(maybe),roads,towns
-      //draws all of the land hexes and their rolls
+      setBackground(new Color(59,85,146));
+      //TODO draw water tiles,roads,towns
       
+      //draws all of the land hexes and their rolls
       for (int r=0; r < hexes.length; r++){ 
          for (int c=0; c < hexes[r].length; c++){
             int x = (c*(55+HORIZONTAL_GAP)) + (200 - ((2 - (Math.abs(r-2)))*(55+HORIZONTAL_GAP)/2));
@@ -111,11 +119,19 @@ public class GameGUI extends Canvas implements MouseListener{
                g.drawImage(rolls[r][c],x+15,y+20,this);
          } 
       }
-      g.drawImage(northwestPort,172,3,this);
-      g.drawImage(northeastPort,369,51,this);
-      g.drawImage(eastPort,426,148,this);
-      g.drawImage(southwestPort,173,294,this);
+      //draw 3:1 ports
+      g.drawImage(northwestPort,171,2,this);
+      g.drawImage(northeastPort,370,50,this);
+      g.drawImage(eastPort,427,148,this);
+      g.drawImage(southwestPort,172,295,this);
+      //draw 2:1 ports
+      g.drawImage(woolPort,286,2,this);
+      g.drawImage(orePort,116,99,this);
+      g.drawImage(lumberPort,285,295,this);
+      g.drawImage(grainPort,116,197,this);
+      g.drawImage(brickPort,371,246,this);
       
+      //draw settlements/cities
       for(int r=0; r < towns.length; r++){
          for(int c=0;c < towns[r].length; c++){
             TownNode tempTown = towns[r][c];
@@ -152,9 +168,9 @@ public class GameGUI extends Canvas implements MouseListener{
                else if(tempTown.getColor().equals(Color.BLUE))
                   g.drawImage(cityBlue,x,y,this); 
             }
-            /*For Testing
-            System.out.println("Row: "+r+"\tCol: "+c+"\tX: "+x+"\tY: "+y);
-            g.drawImage(settlementRed,x,y,this);*/
+            //Testing purposes
+            //System.out.println("Row: "+r+"\tCol: "+c+"\tX: "+x+"\tY: "+y);
+            //g.drawImage(cityRed,x,y,this);
             
          }
       }
@@ -164,33 +180,62 @@ public class GameGUI extends Canvas implements MouseListener{
    public void mouseClicked(MouseEvent e) {
       int x = e.getX();
       int y = e.getY();
+      int[] coords;
       System.out.println("Click at "+x+","+y);
       System.out.println("State:"+state);
       switch(state){
-         case 0:
+         case DEFAULT_STATE:
+            coords = mapToTown(x,y);
+            System.out.println(coords[0]+" "+coords[1]);
+
             if(e.isMetaDown()){
-               int[] coords = mapToTile(x,y);
+               coords = mapToTile(x,y);
                if(coords[0]>=0 && coords[1]>=0)
                   JOptionPane.showMessageDialog(frame,board.getTileAt(coords[0],coords[1]));
             }
             break;
             
-         case 1:
+         case ROAD_STATE:
             //TODO
             break;
             
-         case 2:
-            //TODO
+         case TOWN_STATE:
+            coords = mapToTown(x,y);
+            
+            if(coords[0]<0 || coords[1]<0){
+               System.out.println("No town node clicked");
+               return;
+            }
+               
+            if(towns[coords[0]][coords[1]].get_level()>0){
+               System.out.println("Trying to build a town on another town");
+               return;
+            }
+            
+            menu_bar.buildTown(towns[coords[0]][coords[1]]);
+            update(getGraphics());
             break;
             
-         case 3:
-            //TODO
+         case CITY_STATE:
+            coords = mapToTown(x,y);
+            if(coords[0]<0 || coords[1]<0){
+               System.out.println("No town node clicked");
+               return;
+            }
+                
+            if(towns[coords[0]][coords[1]].get_level()!=1){
+               System.out.println("Not clicking a town to upgrade to a city");
+               return;
+            }
+            
+            menu_bar.buildTown(towns[coords[0]][coords[1]]);   
             break;
          
-         case 4:
+         case ROBBER_STATE:
             System.out.println("Entered robber case");
             System.out.println("Coords are " + x + " " + y);
-            int[] coords = mapToTile(x,y);
+            coords = mapToTile(x,y);
+            
             if(coords[0]>=0 && coords[1]>=0){
                System.out.println("coords made");
                board.moveRobber(coords[0],coords[1]);
@@ -200,6 +245,7 @@ public class GameGUI extends Canvas implements MouseListener{
             }
             else
                System.out.println("Invalid click");
+               
             update(getGraphics());
             break;
       }
@@ -236,7 +282,10 @@ public class GameGUI extends Canvas implements MouseListener{
          coords[0]=4;
                
                
-      if(x>155 && x<185){
+      if(x<155){
+         return coords;
+      }
+      else if(x<185){
          if(coords[0]==2)
             coords[1]=0;
       }  
@@ -278,6 +327,69 @@ public class GameGUI extends Canvas implements MouseListener{
          if(coords[0]==2)
             coords[1]=4;
       }
+      return coords;
+   }
+   
+   private int[] mapToTown(int x,int y){
+      int[] coords = {-1,-1};
+      if(y>=45 && y<=75)
+         coords[0]=0;
+      else if(y>=95 && y<=125)
+         coords[0]=1;
+      else if(y>=145 && y<=175)
+         coords[0]=2;
+      else if(y>=190 && y<=220)
+         coords[0]=3;
+      else if(y>=240 && y<=270)
+         coords[0]=4;
+      else if(y>=285 && y<=315)
+         coords[0]=5;
+         
+      if(coords[0]<0)
+         return coords;
+         
+      if(x>=135 && x<=155){
+         if(coords[0]==2 || coords[0]==3)
+            coords[1]=0;
+      }
+      else if(x>=165 && x<=180){
+         if(coords[0]==1 || coords[0]==4)
+            coords[1]=0;
+         else if(coords[0]==2 || coords[0]==3)  
+            coords[1]=1;
+      }
+      else if(x>=190 && x<=210){
+         coords[1]=(int)(2.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=220 && x<=235){
+         coords[1]=(int)(3.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=245 && x<=265){
+         coords[1]=(int)(4.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=275 && x<=295){
+         coords[1]=(int)(5.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=305 && x<=325){
+         coords[1]=(int)(6.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=335 && x<=350){
+         coords[1]=(int)(7.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=360 && x<=380){
+         coords[1]=(int)(8.5-Math.abs(coords[0]-2.5));
+      }
+      else if(x>=390 && x<=405){
+         if(coords[0]==1 || coords[0]==4)
+            coords[1]=8;
+         else if(coords[0]==2 || coords[0]==3)
+            coords[1]=9;
+      }
+      else if(x>=415 && x<=430){
+         if(coords[0]==2 || coords[0]==3)
+            coords[1]=10;
+      }
+   
       return coords;
    }
 }

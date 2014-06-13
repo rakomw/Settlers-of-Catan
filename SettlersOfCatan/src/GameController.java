@@ -36,6 +36,8 @@ public class GameController {
       
       game_gui.setMenuBar(menu_bar);
       menu_bar.setGUI(game_gui);
+      
+      menu_bar.starting_placements();
    }
    
    public static void endGame(HumanPlayer p){

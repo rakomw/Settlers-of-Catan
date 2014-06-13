@@ -99,6 +99,7 @@ public class GameMenuBar extends JMenuBar{
          int roll = (int)(Math.random()*11)+2;
          JOptionPane.showMessageDialog(frame,current_player + " has rolled " + roll);
          if(roll==7){
+         
             System.out.println("setting state to " + GameGUI.ROBBER_STATE);
             game_gui.setState(GameGUI.ROBBER_STATE);
             JOptionPane.showMessageDialog(frame,"Please move the robber");
@@ -109,6 +110,48 @@ public class GameMenuBar extends JMenuBar{
       }
    }
 
+   private void discard(){
+      for(HumanPlayer p:players){
+         if(p.getResourceCards().size()>7){
+            JOptionPane.showMessageDialog(frame,"Please pass the computer to "+p);
+            while(true){
+               JOptionPane.showMessageDialog(frame,"You must discard " + p.getResourceCards().size()/2 + " resource cards.");
+               
+               ArrayList<Integer> cards = current_player.getResourceCards();
+               String message = "You have:\n";
+               int[] count = {0,0,0,0,0};
+               for(int i:cards)
+                  count[i]++;
+            
+               for(int k=0;k<count.length;k++)
+                  message+=count[k]+" " + translate(k)+"\n";
+            
+               JOptionPane.showMessageDialog(frame,message);
+               
+               int[] discarding = new int[p.getResourceCards().size()/2];
+               String[] options = {"Lumber","Ore","Brick","Wool","Grain"};
+               for(int k=0;k<discarding.length;k++){
+                  String trashing = (String)JOptionPane.showInputDialog(frame,
+                     "Which resouce will you discard?", "Discarding Resources",JOptionPane.QUESTION_MESSAGE,
+                     null,options,options[0]);
+                  if(trashing==null){
+                     k--;
+                     continue;
+                  }
+                     
+                  discarding[k]=translate(trashing);
+               }
+               if(p.hasResources(discarding)){
+                  p.trade(discarding,null);
+                  break;
+               }
+               else{
+                  JOptionPane.showMessageDialog(frame,"You don't have the resources you selected to discard. Try again");
+               }
+            }
+         } 
+      }   
+   }
    public static int translate(String s){
       if(s.equals("Lumber"))
          return 0;
@@ -171,38 +214,56 @@ public class GameMenuBar extends JMenuBar{
       stealing_from.trade(taking,giving);
    }
 	
+   public void buildTown(TownNode town){
+      if(town.isBuildable(current_player)){
+         if(town.get_level()==0){
+            int[] paid={1,0,1,1,1};
+            current_player.trade(paid,null);
+         }
+         else{
+            int[] paid={0,3,0,0,2};
+            current_player.trade(paid,null);
+         }
+         town.buildUp(current_player);
+         game_gui.setState(GameGUI.DEFAULT_STATE);
+      }
+      else
+         JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
+   }
+  
 	
-  public void starting_placements() {
-     int start = turn;
-     if (players.size() == 4) {
-       for (int i=0;i<4;i++) {
+   public void starting_placements() {  
+      /*
+      
+               if (players.size() == 4) {
+            for (int i=0;i<4;i++) {
          // vvvvvv placeholder for selection of town @TODO robbie
-         TownNode build_node = null;
-         if (build_node.isBuildable(players.get(start))) {
-           players.get(start%4).build_town(build_node);
-         }
+            TownNode build_node = null;
+            if (build_node.isBuildable(players.get(start))) {
+               players.get(start%4).build_town(build_node);
+            }
          // vvvvvv placeholder for selection of road @TODO robbie
-         RoadNode build_node2 = null;
-         if (build_node2.isBuildable(players.get(start))) {
-           players.get(start%4).build_road(build_node2);
-         }
-         start++;
-       }
-       start--;
-       for (int i=0;i<4;i++) {
-         // vvvvvv placeholder for selection of town @TODO robbie
-         TownNode build_node = null;
-         if (build_node.isBuildable(players.get(start))) {
-           players.get(start%4).build_town(build_node);
-         }
-         // vvvvvv placeholder for selection of road @TODO robbie
-         RoadNode build_node2 = null;
-         if (build_node2.isBuildable(players.get(start))) {
-           players.get(start%4).build_road(build_node2);
+            RoadNode build_node2 = null;
+            if (build_node2.isBuildable(players.get(start))) {
+               players.get(start%4).build_road(build_node2);
+            }
+            start++;
          }
          start--;
-       }
-     }
+         for (int i=0;i<4;i++) {
+         // vvvvvv placeholder for selection of town @TODO robbie
+            TownNode build_node = null;
+            if (build_node.isBuildable(players.get(start))) {
+               players.get(start%4).build_town(build_node);
+            }
+         // vvvvvv placeholder for selection of road @TODO robbie
+            RoadNode build_node2 = null;
+            if (build_node2.isBuildable(players.get(start))) {
+               players.get(start%4).build_road(build_node2);
+            }
+            start--;
+         }
+      }*/
    }
    
    private class RoadListener implements ActionListener{
@@ -219,21 +280,19 @@ public class GameMenuBar extends JMenuBar{
    }
    private class SettlementListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-      	//TODO Allow clicking of town nodes
-         TownNode cur_town = null;
-         int[] to_remove = {1,0,1,1,1};
-         if (current_player.hasResources(to_remove) && cur_town.isBuildable(current_player))  {
-           current_player.build_town(cur_town);     
+         int[] cost = {1,0,1,1,1};
+         if (current_player.hasResources(cost)){ 
+            current_player.trade(cost,null);
+            game_gui.setState(GameGUI.TOWN_STATE); 
          }
       }
    }
    private class CityListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-      	//TODO Allow clicking of player's settlements
-         TownNode cur_town = null;
-         int[] to_remove = {0,3,0,0,2};
-         if (current_player.hasResources(to_remove) && cur_town.isBuildable(current_player))  {
-           current_player.build_town(cur_town);      
+         int[] cost= {0,3,0,0,2};
+         if (current_player.hasResources(cost)){ 
+            current_player.trade(cost,null); 
+            game_gui.setState(GameGUI.CITY_STATE);
          }
       }
    }

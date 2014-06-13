@@ -34,7 +34,7 @@ public class TownNode extends Node {
 	// returns true if there is an adjacent road owned by the same player
 	public boolean isBuildable(HumanPlayer prospector) {
       
-		if (level >= 2 || (!owner.equals(prospector) && owner!=null)) {
+		if (level >= 2 || (owner!=null && !owner.equals(prospector))) {
 			return false;
 		}
 		for (TownNode t : adj_towns) {
@@ -43,7 +43,7 @@ public class TownNode extends Node {
 			}
 		}
 		for (RoadNode r : adj_roads) {
-			if (r.getBuildLevel() == 1 && r.getOwner() == prospector) {
+			if (r.getBuildLevel() == 1 && r.getOwner()!=null && r.getOwner() == prospector) {
 				return true;
 			}
 		}
@@ -53,17 +53,10 @@ public class TownNode extends Node {
 	
 	// TownNode specific functions
 	public Tile[] getAdjacentTiles() {
-		Tile[] output = new Tile[adj_tiles.length];
-		// prevent return by reference
-		for (int x = 0; x < output.length; x++) {
-			output[x] = new Tile(adj_tiles[x].resource, adj_tiles[x].roll);
-		}
-		
-		return output;
+		return adj_tiles;
 	}
 	public Tile getAdjacentTile(int index) {
-		// prevent returning by reference
-		return new Tile(adj_tiles[index].resource, adj_tiles[index].roll);
+		return adj_tiles[index];
 	}
 	public boolean get_trader() {
 	  return is_trader;
