@@ -5,8 +5,7 @@ public abstract class Node {
 	
 	public abstract boolean isBuildable(HumanPlayer prospector);
 	public abstract void buildUp(HumanPlayer prospector);
-	
-
+   
 	public int getBuildLevel() {
 		return level;
 	}

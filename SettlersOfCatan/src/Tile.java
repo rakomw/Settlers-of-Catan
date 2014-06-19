@@ -1,4 +1,4 @@
-public class Tile {
+ public class Tile {
 	public Tile(int in_resource, int in_chance) {
 		resource = in_resource;
 		roll = in_chance;

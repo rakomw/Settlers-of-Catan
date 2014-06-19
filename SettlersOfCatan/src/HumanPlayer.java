@@ -22,7 +22,12 @@ public class HumanPlayer {
       development=new ArrayList<Card>();
       knights=0;
       longest_road=false;
-      largest_army=false;
+      largest_army=false;  
+      //testing
+      /*for(int k=0;k<=Tile.GRAIN;k++){
+         for(int j=0;j<50;j++)
+            hand.add)k)
+      }*/
    }
 
    public void resourceProduction(int roll) {
@@ -93,7 +98,7 @@ public class HumanPlayer {
       toun.buildUp(this);  
    }
 	
-   public boolean trade(int[] to_remove,int[] addition){
+   public void trade(int[] to_remove,int[] addition){
       if(hasResources(to_remove)){
          for(int i:to_remove)
             hand.remove(Integer.valueOf(i));
@@ -101,11 +106,7 @@ public class HumanPlayer {
             from interpreting it as an index*/
          for(int i:addition)
             hand.add(i);
-            
-         return true;
       }
-      else 
-         return false;
    }
    
    public boolean hasResources(int[] removing){
@@ -133,7 +134,7 @@ public class HumanPlayer {
    }
 	
    public String toString(){
-      String name = "The ";
+      String name = "";
       
       if(color.equals(Color.RED))
          name+="Red ";

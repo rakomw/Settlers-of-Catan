@@ -8,8 +8,7 @@ public class RoadNode extends Node {
 	
    public static final int NOTHING = 0;
    public static final int ROAD = 1;
-	
-   private int level; // 0 for no road, 1 for road
+   
    private final RoadNode[] adj_roads; // adjacent towns and roads
    private final TownNode[] adj_towns;
 	
@@ -20,11 +19,14 @@ public class RoadNode extends Node {
    }
 	
    public boolean isBuildable(HumanPlayer prospector) {
-      if (level > 0) {
+      if (owner!=null) {
+         System.out.println("Attempt to build road on top of another road");
          return false;
       }
+      System.out.println("Adj roads:");
       for (RoadNode r : adj_roads) {
-         if (r.getBuildLevel() > 0 && r.getOwner() == prospector) {
+         System.out.println(r+" level: "+r.getBuildLevel()+" owner: "+r.getOwner());
+         if (r.getBuildLevel() > 0 && r.getOwner() == prospector) {  
             return true;
          }
       }

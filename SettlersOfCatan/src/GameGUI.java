@@ -38,15 +38,23 @@ public class GameGUI extends Canvas implements MouseListener{
    //spacing for tiles: 0 for both is edges touching, 2 and 4 are preferred to make road and town areas clearer
    //changing the gaps is not recommended right now because current hitboxes probably won't map correctly with different gaps 
    private static final int HORIZONTAL_GAP=2,VERTICAL_GAP=4;
-   public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4, STARTING_TOWN_STATE = 5,STARTING_ROAD_STATE = 6;
-   private int state;
+   //various states that determine how the mouselistener responds to clicks
+   public static final int DEFAULT_STATE = 0, ROAD_STATE = 1, TOWN_STATE = 2, CITY_STATE = 3, ROBBER_STATE = 4, STARTING_TOWN_STATE = 5,STARTING_ROAD_STATE = 6, FREE_ROADS_STATE = 7;
+   //state is the current state of the GUI, stage is the step that the GUI is on in either 
+   //initial town and road placement or in the two free roads development card, turn is the location in the player list
+   private int state, stage, turn;
+   private ArrayList<HumanPlayer> players;
+   private HumanPlayer current_player;
 
    
    
    public void setMenuBar(GameMenuBar bar){
       menu_bar=bar;
+      players=menu_bar.getPlayers();
    }
    public GameGUI(){
+      //stage starts at 0 for initial road and town placement
+      stage=0;
       frame = GameController.frame;
       board = Board.getInstance();
       towns = board.getTowns();
@@ -240,11 +248,12 @@ public class GameGUI extends Canvas implements MouseListener{
                y = (r*50) + 50 - (15*(c%2));
             }
             else if(r==3){
-               y = (r*50)+30+(15*(c%2));
+               y = (r*50)+25+(15*(c%2));
             }
             else{
                y = (r*50)+25+(15*(c%2));
             }
+            //check for towns. if found, draw appropriate colored settlement
             if(tempTown.get_level()==TownNode.TOWN){
                if(tempTown.getColor().equals(Color.RED))
                   g.drawImage(settlementRed,x,y,this);
@@ -255,6 +264,7 @@ public class GameGUI extends Canvas implements MouseListener{
                else if(tempTown.getColor().equals(Color.BLUE))
                   g.drawImage(settlementBlue,x,y,this);      
             }
+            //check for cities
             else if(tempTown.get_level()==TownNode.CITY){
                if(tempTown.getColor().equals(Color.RED))
                   g.drawImage(cityRed,x,y,this);
@@ -267,7 +277,7 @@ public class GameGUI extends Canvas implements MouseListener{
             }
             //Testing purposes
             //System.out.println("Row: "+r+"\tCol: "+c+"\tX: "+x+"\tY: "+y);
-            //g.drawImage(cityBlue,x,y,this);
+            //g.drawImage(settlementRed,x,y,this);
             
          }
       }
@@ -286,6 +296,7 @@ public class GameGUI extends Canvas implements MouseListener{
                coords = mapToTile(x,y);
                if(coords[0]>=0 && coords[1]>=0)
                   JOptionPane.showMessageDialog(frame,board.getTileAt(coords[0],coords[1]));
+               
             }
             break;
             
@@ -296,8 +307,14 @@ public class GameGUI extends Canvas implements MouseListener{
                for (int c = 0; c < roads[r].length; c++) {
                   if (road_hitboxes[r][c].contains(x, y)) {
                      System.out.println("Road clicked");
-                     menu_bar.buildRoad(roads[r][c]);
-                     update(getGraphics());
+                     if(roads[r][c].isBuildable(current_player)){
+                        System.out.println("Road buildable");
+                        current_player.build_road(roads[r][c]);
+                        setState(DEFAULT_STATE);
+                        update(getGraphics());
+                     }
+                     else
+                        JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
                   }
                }
             }
@@ -316,7 +333,14 @@ public class GameGUI extends Canvas implements MouseListener{
                return;
             }
             
-            menu_bar.buildTown(towns[coords[0]][coords[1]]);
+            if(towns[coords[0]][coords[1]].isBuildable(current_player)){
+               towns[coords[0]][coords[1]].buildUp(current_player);
+               setState(DEFAULT_STATE);
+               update(getGraphics());
+            }
+            else
+               JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
+                  
             update(getGraphics());
             break;
             
@@ -332,20 +356,58 @@ public class GameGUI extends Canvas implements MouseListener{
                return;
             }
             
-            menu_bar.buildTown(towns[coords[0]][coords[1]]);   
+            if(towns[coords[0]][coords[1]].isBuildable(current_player)){
+               towns[coords[0]][coords[1]].buildUp(current_player);
+               setState(DEFAULT_STATE);
+               update(getGraphics());
+            }
+            else
+               JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
+                  
             break;
          
          case ROBBER_STATE:
             coords = mapToTile(x,y);
-            
+            //if a valid location was selected, perform all robber-associated actions
             if(coords[0]>=0 && coords[1]>=0){
+               //first, move the robber to its new location
                board.moveRobber(coords[0],coords[1]);
-               menu_bar.doRobber(coords[0],coords[1]);
+               //put gui back in default state to prevent extra clicks
+               setState(DEFAULT_STATE);
+               System.out.println("doRobber");
+               ArrayList<HumanPlayer> list = new ArrayList<HumanPlayer>();
+               //find all players with towns/cities at the robber's new tile
+               for(HumanPlayer p:players)
+                  for (TownNode town : p.getTowns()) 
+                     for (Tile tile : town.getAdjacentTiles()) 
+                        if (tile!=null&&tile.equals(board.getTileAt(coords[0],coords[1]))&& !p.equals(current_player)) 
+                           list.add(p);
+               if(list.isEmpty())
+                  return;
+               Object[] options = list.toArray();
+               //the player who moved the robber must steal from one of these players
+               HumanPlayer stealing_from;
+               do{
+                  stealing_from = (HumanPlayer)JOptionPane.showInputDialog(frame,
+                     "From which player will you steal? ","Stealing a resource",
+                     JOptionPane.QUESTION_MESSAGE,null,options,options[0]);  
+               }while (stealing_from==null);
+               //make sure the victim has something to actually take
+               ArrayList<Integer> cards = stealing_from.getResourceCards();
+               if(cards.isEmpty())
+                  return;
+               //select a random resource and transfer it
+               int stolen = cards.get((int)(Math.random()*cards.size()));
+               int[] taking = {stolen};
+               int[] giving = {};
+               current_player.trade(giving,taking);
+               stealing_from.trade(taking,giving);
+               JOptionPane.showMessageDialog(frame,"You stole " + GameMenuBar.translate(stolen));
             }  
             update(getGraphics());
             break;
           
-          case STARTING_TOWN_STATE:
+         case STARTING_TOWN_STATE:
             System.out.println("Entered starting town case");
             coords = mapToTown(x,y);
             
@@ -353,29 +415,99 @@ public class GameGUI extends Canvas implements MouseListener{
                System.out.println("No town node clicked");
                return;
             }
-            menu_bar.buildStartTown(towns[coords[0]][coords[1]]);
-            update(getGraphics());
+            TownNode town = towns[coords[0]][coords[1]];
+            if(town.startBuildable(current_player)){
+               current_player.build_town(town);
+               update(getGraphics());
+               setState(STARTING_ROAD_STATE);
+            
+               if(stage>=players.size()){
+                  int[] temp = new int[1];
+                  System.out.println("Ready to give resources");
+                  System.out.println(town.getAdjacentTiles()[0]);
+                  Tile[] tiles = town.getAdjacentTiles();
+                  for(int k=0;k<tiles.length;k++){
+                     temp[0]=tiles[k].resource;
+                     if(temp[0]<=Tile.GRAIN)
+                        current_player.trade(new int[0],temp);
+                  }     
+               }
+            }  
             break;  
             
-          case STARTING_ROAD_STATE:
+         case STARTING_ROAD_STATE:
             System.out.println("Entered starting road case");
+            
             for (int r = 0; r < roads.length; r++) {
                for (int c = 0; c < roads[r].length; c++) {
+                  RoadNode road = roads[r][c];
                   if (road_hitboxes[r][c].contains(x, y)) {
-                     menu_bar.buildStartRoad(roads[r][c]);
+                     if(road.startBuildable(current_player)){
+                        current_player.build_road(road);
+                        setState(DEFAULT_STATE);
+                        update(getGraphics());
+                        stage++;
+                        if(stage<players.size())
+                           turn++;
+                        else if(stage>players.size())
+                           turn--;
+                        initBuild();
+                     }     
+                     
                      update(getGraphics());
                   }
                }
             }
             break;
+         case FREE_ROADS_STATE:
+            System.out.println("Entered two free roads case");
+            for (int r = 0; r < roads.length; r++) {
+               for (int c = 0; c < roads[r].length; c++) {
+                  if (road_hitboxes[r][c].contains(x, y)) {
+                     System.out.println("Road clicked");
+                     if(roads[r][c].isBuildable(current_player)){
+                        current_player.build_road(roads[r][c]);
+                        update(getGraphics());
+                        if(stage==1)
+                           setState(DEFAULT_STATE);
+                        else{
+                           stage++;
+                           JOptionPane.showMessageDialog(frame,"Please choose a location for your second free road");
+                        }
+                     }
+                     else
+                        JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
+                  }
+               }
+            }   
       }
    } 
-     
+   
+   public void initBuild(){
+      if(stage==players.size()*2){
+         turn++;
+         menu_bar.nextTurn();
+         return;
+      }
+      current_player = players.get(turn%players.size());
+      update(getGraphics());
+      JOptionPane.showMessageDialog(frame,current_player+": Please build a town and then a road");
+      setState(STARTING_TOWN_STATE);
+         
+   }
+   public void twoFreeRoads(){
+      setState(FREE_ROADS_STATE);
+      stage=0;
+   }
    public void setState(int s){
       state=s;
       System.out.println("State has been set to "  +state);
    }
    
+   public void setCurrentPlayer(HumanPlayer p){
+      current_player=p;
+      turn=players.indexOf(p);
+   }
    //The following are required by the interface, but are not used by this particular class
    public void mouseReleased(MouseEvent e){
    }
@@ -511,5 +643,14 @@ public class GameGUI extends Canvas implements MouseListener{
       }
    
       return coords;
+   }
+   
+   public int getState(){
+      return state;
+   }
+   
+   public void update(Graphics g){
+      for(int k=0;k<3;k++)
+         super.update(g);
    }
 }

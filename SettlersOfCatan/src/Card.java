@@ -16,7 +16,7 @@ public class Card {
         break;
 	   }
 	   case 1: {
-		  suit = "Victory point(reveal when you can end the game)";
+		  suit = "Victory point(Gives you one additional point towards victory)";
         break;
 	   }
 	   case 2: {

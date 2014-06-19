@@ -236,7 +236,7 @@ public class Board {
 		}
 		System.out.println("link vertical roads");
 		for (r = 1; r < roads.length; r += 2) {
-			for (c = 1; c < roads[r].length; c++) {
+			for (c = 0; c < roads[r].length; c++) {
 				linkVerticalRoad(r, c, road_road_constructors, road_town_constructors, town_road_constructors, town_town_constructors);
 			}
 		}
@@ -250,31 +250,32 @@ public class Board {
 		System.out.println("instantiate the town nodes");
 		for (r = 0; r < towns.length; r++) {
 			for (c = 0; c < towns[r].length; c++) {
-				linkTown(r, c, town_town_constructors, town_tile_constructors[r][c]);
+				linkTown(r, c, road_town_constructors, town_road_constructors, town_town_constructors, town_tile_constructors[r][c]);
 			}
 		}
       
-      // reality check on town-tile references
-      /*boolean good;
-      for (r = 0; r < towns.length; r++) {
-         for (c = 0; c < towns[r].length; c++) {
-            for (Tile t : towns[r][c].getAdjacentTiles()) {
+      // reality check on references
+      boolean good;
+      for (r = 0; r < roads.length; r++) {
+         for (c = 0; c < roads[r].length; c++) {
+            for (int x = 0; x < roads[r][c].getAdjacentRoads().length; x++) {
+               RoadNode ro = roads[r][c].getAdjacentRoads()[x];
                good = false;
-               if (t == null) {
-                  System.out.println("null problem: town " + r + ", " + c + " references length: " + towns[r][c].getAdjacentTiles().length);
+               if (ro == null) {
+                  System.out.println("null problem: road " + r + ", " + c + " references length: " + roads[r][c].getAdjacentRoads().length + " index: " + x);
                }
-               for (int r2 = 0; r2 < tiles.length; r2++) {
-                  for (int c2 = 0; c2 < tiles[r2].length; c2++) {
-                     if (t.resource == tiles[r2][c2].resource && t.roll == tiles[r2][c2].roll) {
+               /*for (int r2 = 0; r2 < towns.length; r2++) {
+                  for (int c2 = 0; c2 < towns[r2].length; c2++) {
+                     if (t.resource == towns[r2][c2].resource && t.roll == towns[r2][c2].roll) {
                         good = true;
                      }
                   }
                }
-               System.out.println("problem: town " + r + ", " + c);
+               System.out.println("problem: town " + r + ", " + c);*/
             }
             
          }
-      }*/
+      }
 		System.out.println("dependencies: " + ref_count);
 	}
 	
@@ -305,12 +306,15 @@ public class Board {
 				linkReference(road_road_constructors[r][c], road_road_constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 			
-			// road-town links
+         // road-town
 			other_r = r / 2;
 			other_c = c * 2;
-			if (onBoard(towns, other_r, other_r)) {
+			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 			}
+         else {
+            System.out.println("this is stupid");
+         }
 			other_r++;
 			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
@@ -323,11 +327,12 @@ public class Board {
 			if (onBoard(roads, other_r, other_c)) {
 				linkReference(road_road_constructors[r][c], road_road_constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
-			other_c++; // other_c = c * 2 + 1;
+			other_c--; // other_c = c * 2 + 1;
 			if (onBoard(roads, other_r, other_c)) {
 				linkReference(road_road_constructors[r][c], road_road_constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
 			other_r = r + 1;
+         other_c++;
 			if (onBoard(roads, other_r, other_c)) {
 				linkReference(road_road_constructors[r][c], road_road_constructors[other_r][other_c], roads[r][c], roads[other_r][other_c]);
 			}
@@ -337,8 +342,9 @@ public class Board {
 			}
 			
 			// road-town links
-			other_r = r / 2;
+         other_r = r / 2;
 			other_c = c * 2;
+         System.out.println(r + ", " + c);
 			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 			}
@@ -371,7 +377,7 @@ public class Board {
 			
 			// road-town links
 			other_r = r / 2;
-			other_c = c * 2+ 1;
+			other_c = c * 2 + 1;
 			if (onBoard(towns, other_r, other_c)) {
 				linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 			}
@@ -402,6 +408,9 @@ public class Board {
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
 		}
+      else {
+         System.out.println("can't be found horizontally, coords: " + r + ", " + c);
+      }
 		other_c = c + 1;
 		if (onBoard(towns, other_r, other_c)) {
 			linkReference(road_town_constructors[r][c], town_road_constructors[other_r][other_c], roads[r][c], towns[other_r][other_c]);
@@ -409,46 +418,78 @@ public class Board {
 	}
 	
 	// helper method for town construction, doesn't need to add road references
-	private void linkTown(final int r, final int c, final TownNode[][][] town_constructors, Tile[] tile_constructors) {
+	private void linkTown(final int r, final int c, final TownNode[][][] road_town_constructors, final RoadNode[][][] town_road_constructors, final TownNode[][][] town_town_constructors, Tile[] tile_constructors) {
 		int other_r = r, 
 			other_c = c - 1;
 		// link references to other towns
 		if (onBoard(towns, other_r, other_c)) {
-			linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+			linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 		}
 		other_c = c + 1;
 		if (onBoard(towns, other_r, other_c)) {
-			linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+			linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 		}
-		if (r < 3) { // in the north of the board
-			if (r % 2 == 0) {
+		if (r < 2) { // in the north of the board
+			if (c % 2 == 0) {
 				other_r = r + 1;
 				other_c = c + 1;
 				if (onBoard(towns, other_r, other_c)) {
-					linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+					linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 				}
 			}
 			else {
 				other_r = r - 1;
 				other_c = c - 1;
 				if (onBoard(towns, other_r, other_c)) {
-				linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 				}
 			}
 		}
+      else if (r == 2) { // at the equator
+         if (c % 2 == 0) {
+				other_r = r + 1;
+				other_c = c;
+				if (onBoard(towns, other_r, other_c)) {
+					linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+			else {
+				other_r = r - 1;
+				other_c = c - 1;
+				if (onBoard(towns, other_r, other_c)) {
+				linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+      }
+      else if (r == 3) {
+         if (c % 2 == 0) {
+				other_r = r - 1;
+				other_c = c;
+				if (onBoard(towns, other_r, other_c)) {
+					linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+			else {
+				other_r = r + 1;
+				other_c = c - 1;
+				if (onBoard(towns, other_r, other_c)) {
+				linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+				}
+			}
+      }
 		else { // in the south of the board
-			if (r % 2 == 0) {
+			if (c % 2 == 0) {
 				other_r = r - 1;
 				other_c = c - 1;
 				if (onBoard(towns, other_r, other_c)) {
-					linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+					linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 				}
 			}
 			else {
 				other_r = r + 1;
-				other_c = c + 1;
+				other_c = c - 1;
 				if (onBoard(towns, other_r, other_c)) {
-					linkReference(town_constructors[r][c], town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
+					linkReference(town_town_constructors[r][c], town_town_constructors[other_r][other_c], towns[r][c], towns[other_r][other_c]);
 				}
 			}
 		}
@@ -503,9 +544,9 @@ public class Board {
 					addReference(tile_constructors, tiles[other_r][other_c]);
 				}
 			}
-			else {
+			else { // odd
 				other_r = r - 1;
-				other_c = c / 2 - 1;
+				other_c = c / 2;
 				if (onBoard(tiles, other_r, other_c)) {
 					addReference(tile_constructors, tiles[other_r][other_c]);
 				}
@@ -520,6 +561,17 @@ public class Board {
 				}
 			}
 		}
+      
+      // town-road references
+      /*(other_r = r * 2;
+      other_c = c;
+      if (onBoard(roads, other_r, other_c)) {
+         linkReference(town_road_constructors[r][c], road_town_constructors[other_r][other_c], towns[r][c], roads[other_r][other_c]);
+      }
+      other_c--;
+      if (onBoard(roads, other_r, other_c)) {
+         linkReference(town_road_constructors[r][c], road_town_constructors[other_r][other_c], towns[r][c], roads[other_r][other_c]);
+      }*/
 	}
 	
 	// parameters: the parts of the board to be checked, the location in those parts to be checked
@@ -527,9 +579,9 @@ public class Board {
 		return r >= 0 && r < parts.length && c >= 0 && c < parts[r].length;
 	}
 	
-	private void addReference(Object[] constructors, Object other) {
+	private void addReference(final Object[] constructors, final Object other) {
 		for (int x = 0; x < constructors.length; x++) {
-			// the or allows this function to be always used without worrying about copied references
+			// this or allows this function to be always used without worrying about copied references
 			if (constructors[x] == other) {
 				break;
 			}

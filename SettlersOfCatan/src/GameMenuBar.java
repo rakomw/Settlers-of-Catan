@@ -14,6 +14,7 @@ public class GameMenuBar extends JMenuBar{
    
    public void setGUI(GameGUI gui){
       game_gui=gui;
+      game_gui.setCurrentPlayer(current_player);
    }
    public GameMenuBar(int p){
       board = Board.getInstance();
@@ -21,17 +22,20 @@ public class GameMenuBar extends JMenuBar{
       deck=new Deck();
       turn=(int)(Math.random()*p)+20;//padding
       players = new ArrayList<HumanPlayer>();
+      
       num_players = p;
-      if(num_players==3)
-         victory_points=10;
-      else{
-         players.add(new HumanPlayer(Color.ORANGE));
-         victory_points=12;
-      }
+      victory_points = 10;
       
       players.add(new HumanPlayer(Color.RED));
       players.add(new HumanPlayer(Color.BLUE));
-      players.add(new HumanPlayer(Color.GREEN));
+      
+      if(num_players>2)
+         players.add(new HumanPlayer(Color.GREEN));
+         
+      if(num_players>3){
+         players.add(new HumanPlayer(Color.ORANGE));
+         victory_points=12;
+      }
      
       current_player=players.get(turn%players.size());
       createMenus();
@@ -94,13 +98,14 @@ public class GameMenuBar extends JMenuBar{
       add(refresh);
    }
 	
-   private void nextTurn(){
+   public void nextTurn(){
       giveLongestRoad();
       giveLargestArmy();
       if(current_player.get_points()>=victory_points)
          GameController.endGame(current_player);
       else{
          current_player=players.get((turn++)%num_players);
+         game_gui.setCurrentPlayer(current_player);
          int roll = (int)(Math.random()*11)+2;
          JOptionPane.showMessageDialog(frame,current_player + " has rolled " + roll);
          if(roll==7){
@@ -114,7 +119,9 @@ public class GameMenuBar extends JMenuBar{
                p.resourceProduction(roll);
       }
    }
-   
+   public ArrayList<HumanPlayer> getPlayers(){
+      return players;
+   }
    private void giveLongestRoad(){
       for(HumanPlayer p:players)
          p.set_longest_road(false);
@@ -122,13 +129,15 @@ public class GameMenuBar extends JMenuBar{
       //is at least 5 long, do set_longest_road(true) on that player
    }
    private void giveLargestArmy(){
+      //reset largest army to false for all players
       for(HumanPlayer p:players)
          p.set_largest_army(false);
+      //find player with greatest number of knights
       int max=0;
       for(int k=1;k<players.size();k++)
          if(players.get(k).get_num_knights()>players.get(max).get_num_knights())
             max=k;
-            
+      //largest army only applies if the army is at least three knights
       if(players.get(max).get_num_knights()>=3)
          players.get(max).set_largest_army(true);   
    }
@@ -208,132 +217,66 @@ public class GameMenuBar extends JMenuBar{
             return "";
       }  
    }
-   
-   public void doRobber(int r,int c){
-      game_gui.setState(game_gui.DEFAULT_STATE);
-      System.out.println("doRobber");
-      ArrayList<HumanPlayer> list = new ArrayList<HumanPlayer>();
-      for(HumanPlayer p:players)
-         for (TownNode town : p.getTowns()) 
-            for (Tile tile : town.getAdjacentTiles()) 
-               if (tile!=null&&tile.equals(board.getTileAt(r,c))&& !p.equals(current_player)) 
-                  list.add(p);
-      if(list.isEmpty())
-         return;
-      Object[] options = list.toArray();
-      HumanPlayer stealing_from;
-      do{
-         stealing_from = (HumanPlayer)JOptionPane.showInputDialog(frame,
-               "From which player will you steal? ","Stealing a resource",
-               JOptionPane.QUESTION_MESSAGE,null,options,options[0]);  
-      }while (stealing_from==null);
-         
-      ArrayList<Integer> cards = stealing_from.getResourceCards();
-      if(cards.isEmpty())
-         return;
-      int stolen = cards.get((int)(Math.random()*cards.size()));
-      int[] taking = {stolen};
-      int[] giving = {};
-      current_player.trade(giving,taking);
-      stealing_from.trade(taking,giving);
-   }
-	
-   public void buildTown(TownNode town){
-      if(town.isBuildable(current_player)){
-         town.buildUp(current_player);
-         game_gui.setState(GameGUI.DEFAULT_STATE);
-         game_gui.update(game_gui.getGraphics());
-      }
-      else
-         JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
-   }
-  
-   public void buildRoad(RoadNode road) {
-      if(road.isBuildable(current_player)){
-         current_player.build_road(road);
-         game_gui.setState(GameGUI.DEFAULT_STATE);
-         game_gui.update(game_gui.getGraphics());
-      }
-      else
-         JOptionPane.showMessageDialog(frame,"You can't build there. Please try another location");
-   
-   }
-    
-   private int initStep=0;
-   public void initBuild(){
-      if(initStep==players.size()*2){
-         turn++;
-         nextTurn();
-         return;
-      }
-         
-      current_player = players.get(turn%players.size());
-      JOptionPane.showMessageDialog(frame,"Please build a town "+current_player);
-      game_gui.setState(GameGUI.STARTING_TOWN_STATE);
-   }
-   public void buildStartTown(TownNode town){
-      if(town.startBuildable(current_player)){
-         current_player.build_town(town);
-         game_gui.update(game_gui.getGraphics());
-         game_gui.setState(GameGUI.STARTING_ROAD_STATE);
-         
-         if(initStep>=players.size()){
-            int[] temp = new int[1];
-            for(Tile t:town.getAdjacentTiles()){
-               temp[0]=t.resource;
-               if(temp[0]<=Tile.GRAIN)
-                current_player.trade(temp,null);
-            }     
-         }
-         
-         JOptionPane.showMessageDialog(frame,"Please build a road "+current_player);
-      }   
-   }   
-  
-   public void buildStartRoad(RoadNode road){
-      if(road.startBuildable(current_player)){
-         current_player.build_road(road);
-         game_gui.setState(GameGUI.DEFAULT_STATE);
-         game_gui.update(game_gui.getGraphics());
-         initStep++;
-         if(initStep<players.size())
-            turn++;
-         else if(initStep>players.size())
-            turn--;
-         initBuild();
-      }     
-   }
-   
-        
+
    private class RoadListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-         int[] to_remove = {1,0,1,0,0};
-         if (current_player.hasResources(to_remove)) {
-            game_gui.setState(GameGUI.ROAD_STATE);
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
+         int will_purchase = JOptionPane.showConfirmDialog(frame,"A Road costs one lumber and one brick\n"+
+            "Do you want to purchase one?","Road Purchase",JOptionPane.YES_NO_OPTION);
+         if(will_purchase==JOptionPane.YES_OPTION){
+            System.out.println("Will buy road");
+            int[] to_remove = {0,2};
+            if (current_player.hasResources(to_remove)) {
+               System.out.println("has resources");
+               current_player.trade(to_remove,new int[0]);
+               game_gui.setState(GameGUI.ROAD_STATE);
+               System.out.println("Road state set");
+            }
+            else
+               JOptionPane.showMessageDialog(frame,"You don't have the resources to do that");
          }
       }
    }
    private class SettlementListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-         int[] cost = {1,0,1,1,1};
-         if (current_player.hasResources(cost)){ 
-            current_player.trade(cost,null);
-            game_gui.setState(GameGUI.TOWN_STATE); 
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
+         int will_purchase = JOptionPane.showConfirmDialog(frame,"A Town costs one lumber, one brick, one wool, and one grain\n"+
+            "Do you want to purchase one?","Town Purchase",JOptionPane.YES_NO_OPTION);
+         if(will_purchase==JOptionPane.YES_OPTION){
+            int[] cost = {0,2,3,4};
+            if (current_player.hasResources(cost)){ 
+               current_player.trade(cost,new int[0]);
+               game_gui.setState(GameGUI.TOWN_STATE); 
+            }
+            else
+               JOptionPane.showMessageDialog(frame,"You don't have the resources to do that");
          }
       }
    }
    private class CityListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-         int[] cost= {0,3,0,0,2};
-         if (current_player.hasResources(cost)){ 
-            current_player.trade(cost,null); 
-            game_gui.setState(GameGUI.CITY_STATE);
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
+         int will_purchase = JOptionPane.showConfirmDialog(frame,"A City costs three ore and two grain\n"+
+            "Do you want to purchase one?","City Purchase",JOptionPane.YES_NO_OPTION);
+         if(will_purchase==JOptionPane.YES_OPTION){
+            int[] cost= {1,1,1,4,4};
+            if (current_player.hasResources(cost)){ 
+               current_player.trade(cost,new int[0]); 
+               game_gui.setState(GameGUI.CITY_STATE);
+            }
+            else
+               JOptionPane.showMessageDialog(frame,"You don't have the resources to do that");
          }
       }
    }
 
    private class BankListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
          String harbors_message = "";
          
          boolean lumber_h = hasHarbor(current_player,0);
@@ -395,7 +338,9 @@ public class GameMenuBar extends JMenuBar{
          
          for(int k=0;k<sold.length;k++)
             sold[k]=sold_type;
-         if(!current_player.trade(sold,bought))
+         if(current_player.hasResources(sold))
+            current_player.trade(sold,bought);
+         else
             JOptionPane.showMessageDialog(frame,"Can't trade what you don't have.");
       }
       
@@ -409,6 +354,8 @@ public class GameMenuBar extends JMenuBar{
    }
    private class TradeListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
          ArrayList<HumanPlayer> playerOptions = new ArrayList<HumanPlayer>();
       
          for(HumanPlayer p:players)
@@ -486,6 +433,8 @@ public class GameMenuBar extends JMenuBar{
    }
    private class BuyDevelopmentListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
          int will_purchase = JOptionPane.showConfirmDialog(frame,"A development card costs one ore, one wool, and one grain\n"+
             "Do you want to purchase one?","Development Card Purchase",JOptionPane.YES_NO_OPTION);
          if(will_purchase==JOptionPane.YES_OPTION){
@@ -493,90 +442,54 @@ public class GameMenuBar extends JMenuBar{
             paid[0] = 1;
             paid[1] = 3;
             paid[2] = 4;
-            if(!current_player.trade(paid,new int[0]))
+            if(!current_player.hasResources(paid))
                JOptionPane.showMessageDialog(frame,"You don't have the resources to buy a Development Card");
-            else
+            else{
+               current_player.trade(paid,new int[0]);
                current_player.addDevelopmentCard(deck.deal());
+            }
          }
       }
    }
    private class UseDevelopmentListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-         ArrayList<Card> int_options = current_player.getDevelopmentCards();
-         ArrayList<String> options = new ArrayList<String>();
-         for (int i=0;i<int_options.size();i++) {
-            switch (int_options.get(i).get_suit()) {
-               case 0: 
-                  {
-                     options.add("Knight");
-                     break;
-                  }
-               case 1: 
-                  {
-                     options.add("Free Point");
-                     break;
-                  }
-               case 2: 
-                  {
-                     options.add("Monopoly");
-                     break;
-                  }
-               case 3: 
-                  {
-                     options.add("Road Building");
-                     break;
-                  }
-               case 4: 
-                  {
-                     options.add("Year of Plenty");
-                     break;
-                  }
-            }
-         }
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
+         System.out.println("Development listener triggered");
+         ArrayList<Card> options = current_player.getDevelopmentCards();
          Object[] option_arr = options.toArray();
-         String full_input = (String)JOptionPane.showInputDialog(frame, "what card would you like to use?",
+         System.out.println("Options array is currently: ");
+         for(Object obj:option_arr)
+            System.out.print(obj+"\t");
+         
+         Card choice = (Card)JOptionPane.showInputDialog(frame, "what card would you like to use?",
             "development card usage",JOptionPane.QUESTION_MESSAGE,null,option_arr,option_arr[0]);
-         String input = full_input.substring(0,1);
-       
-         int use;
-         if (input.equals("K")) {
-            use = 0;
-         }
-         if (input.equals("F")) {
-            use = 1;
-         }
-         if (input.equals("M")) {
-            use = 2;
-         }
-         if (input.equals("R")) {
-            use = 3;
-         }
-         if (input.equals("Y")) {
-            use = 4;
-         }
-         else use = -1;
-         switch (use) {
+         if(choice==null)
+            return;
+         options.remove(choice);
+         System.out.println("Chosen Card is " + choice);
+         System.out.println("Suit is " + choice.get_suit());
+         switch (choice.get_suit()) {
             case 0: 
-               {
+                  System.out.println("Entered knight case");
                   current_player.add_knight();
+                  JOptionPane.showMessageDialog(frame,"Please move the robber");
                   game_gui.setState(GameGUI.ROBBER_STATE);
-                  break;
-               }           
-            case 1: 
-               {
+                  System.out.println("Robber state set");
+                  break;          
+            case 1:
                   current_player.free_points_plus();
-                  break;
-               }       
-            case 2: 
-               {           
+                  break;      
+            case 2:         
+                  System.out.println("Monopoly case entered");
                   String[] les_options = {"Lumber","Ore","Brick","Wool","Grain"};
-                  String plenty;
+                  String monopoly;
                   do{
-                     plenty =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
+                     monopoly =  (String)JOptionPane.showInputDialog(frame, "you used Monopoly, what would you like to steal?",
                         "Monopoly",JOptionPane.QUESTION_MESSAGE,null,les_options,les_options[0]);
-                  }while(plenty==null);
-               
-                  int resource = translate(plenty);
+                  }while(monopoly==null);
+                  System.out.println(monopoly+" chosen");
+                  int resource = translate(monopoly);
                   int[] res = {resource};
                
                   for (int i=0;i<players.size();i++) {
@@ -588,20 +501,13 @@ public class GameMenuBar extends JMenuBar{
                      }
                   }           
                   break;
-               }
             case 3: 
-               {
-                  RoadNode place1 = null;
-               //player input @ TODO SIR ROBERT
-                  current_player.build_road(place1);
-               
-                  RoadNode place2 = null;
-               //player input
-                  current_player.build_road(place2);
-                  break;
-               }           
-            case 4: 
-               {                        
+                  JOptionPane.showMessageDialog(frame,"Please select the location for your first free road");
+                  System.out.println("Free road case entered");
+                  game_gui.twoFreeRoads();
+                  break;       
+            case 4:           
+                  System.out.println("Year of Plenty case entered");              
                   String[] the_options = {"Lumber","Ore","Brick","Wool","Grain"};
                   int[] trades = new int[2];
                   for(int k=0;k<2;k++){
@@ -616,12 +522,13 @@ public class GameMenuBar extends JMenuBar{
                   }
                   current_player.trade(new int[0], trades);
                   break;
-               }
          } 
       }
    }
    private class ViewDevCardListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
          ArrayList<Card> cards = current_player.getDevelopmentCards();
          String message = "You have:\n";
          if(cards.size()==0)
@@ -633,6 +540,8 @@ public class GameMenuBar extends JMenuBar{
    }
    private class ViewResourceCardListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
+         if(game_gui.getState()!=GameGUI.DEFAULT_STATE)
+            return;
          ArrayList<Integer> cards = current_player.getResourceCards();
          String message = "You have:\n";
          int[] count = {0,0,0,0,0};
@@ -648,7 +557,10 @@ public class GameMenuBar extends JMenuBar{
    
    private class EndTurnListener implements ActionListener{
       public void actionPerformed(ActionEvent e){
-         nextTurn();
+         if(game_gui.getState()==game_gui.DEFAULT_STATE)
+            nextTurn();
+         else
+            JOptionPane.showMessageDialog(frame,"You can't end your turn yet");
       }
    }
    private class RefreshListener implements ActionListener{

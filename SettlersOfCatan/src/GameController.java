@@ -36,8 +36,7 @@ public class GameController {
       
       game_gui.setMenuBar(menu_bar);
       menu_bar.setGUI(game_gui);
-      
-      menu_bar.initBuild();
+      game_gui.initBuild();
    }
    
    public static void endGame(HumanPlayer p){

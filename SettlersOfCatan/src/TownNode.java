@@ -56,7 +56,7 @@ public class TownNode extends Node {
       if(owner!=null)//can only build on an empty space
          return false;
       for (TownNode t : adj_towns) {
-			if (t.getBuildLevel() > 0) { // there is an adjacent town or city
+			if (t.getOwner()!=null) { // there is an adjacent town or city
 				return false;
 			}
 		}
@@ -77,5 +77,8 @@ public class TownNode extends Node {
 	}
    public int get_level(){
       return level;
+   }
+   public RoadNode[] getAdjacentRoads(){
+      return adj_roads;
    }
 }
